@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../vista/foto.dart';
 
 class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,6 +32,14 @@ class LoginPage extends StatelessWidget {
                 icon: Icons.g_mobiledata,
                 text: 'Continuar con Google',
                 color: Colors.black,
+                onPressed: PhotoGallery()
+              ),
+              SizedBox(height: 24),
+               _buildSocialButton(
+                icon: Icons.g_mobiledata,
+                text: 'Continuar con Google',
+                color: Colors.black,
+                onPressed: PhotoGallery()
               ),
               SizedBox(height: 24),
               Row(children: [
@@ -77,7 +88,7 @@ class LoginPage extends StatelessWidget {
       {IconData? icon,
       String? text,
       bool isSelected = false,
-      required Color color}) {
+      required Color color, required PhotoGallery onPressed}) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: isSelected ? Color(0xFF60DC58) : Colors.transparent,
