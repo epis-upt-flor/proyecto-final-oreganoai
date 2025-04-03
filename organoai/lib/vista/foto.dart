@@ -3,19 +3,23 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class PhotoGallery extends StatefulWidget {
+  const PhotoGallery({super.key});
+
   @override
   _PhotoGalleryState createState() => _PhotoGalleryState();
 }
 
 class _PhotoGalleryState extends State<PhotoGallery> {
-  File? _image;
+  final List<File> _images = []; // Lista para almacenar múltiples imágenes
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
+  Future<void> _pickImages(ImageSource source) async {
+    final pickedFile =
+        await _picker.pickImage(source: source); // Abre cámara o galería
+
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _images.add(File(pickedFile.path)); // Agrega la imagen a la lista
       });
     }
   }
@@ -36,65 +40,88 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             colors: [Colors.green[400]!, Colors.green[900]!],
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _image == null
-                  ? Text(
-                    "No hay imagen seleccionada",
-                    style: TextStyle(color: Colors.black),
-                  )
-                  : Image.file(_image!),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _pickImage(ImageSource.gallery),
-                child: Text("Subir Imagen"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.green[700],
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: _images.isEmpty
+                  ? Center(
+                      child: Text("No hay imágenes seleccionadas",
+                          style: TextStyle(color: Colors.white, fontSize: 16)),
+                    )
+                  : GridView.builder(
+                      padding: EdgeInsets.all(10),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, // Número de imágenes por fila
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: _images.length,
+                      itemBuilder: (context, index) {
+                        return Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                _images[index],
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            Positioned(
+                              right: 5,
+                              top: 5,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _images.removeAt(index);
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black54,
+                                  ),
+                                  padding: EdgeInsets.all(5),
+                                  child: Icon(Icons.close,
+                                      color: Colors.white, size: 20),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+            ),
+            ElevatedButton(
+              onPressed: () => _pickImages(ImageSource.gallery),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.green[700],
               ),
-            ],
-          ),
+              child: Text("Subir Imágenes"),
+            ),
+          ],
         ),
       ),
-      floatingActionButton:
-          _image != null
-              ? FloatingActionButton(
-                backgroundColor: Colors.black54,
-                child: Icon(Icons.close, color: Colors.black),
-                onPressed: () {
-                  setState(() {
-                    _image = null;
-                  });
-                },
-              )
-              : null,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.greenAccent,
         unselectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: TextStyle(
-          color: Colors.black,
-        ), // Texto seleccionado en negro
+        selectedLabelStyle: TextStyle(color: Colors.black),
         unselectedLabelStyle: TextStyle(color: Colors.black),
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Escaneos'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Tomar Foto',
-          ),
+              icon: Icon(Icons.camera_alt), label: 'Tomar Foto'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Configuración',
-          ),
+              icon: Icon(Icons.settings), label: 'Configuración'),
         ],
         onTap: (index) {
           if (index == 1) {
-            _pickImage(ImageSource.camera);
+            // Si presiona "Tomar Foto"
+            _pickImages(ImageSource.camera); // Abre la cámara
           }
         },
       ),
