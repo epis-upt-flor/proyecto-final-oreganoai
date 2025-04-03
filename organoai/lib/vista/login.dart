@@ -40,7 +40,7 @@ class LoginPage extends StatelessWidget {
                 Expanded(child: Divider(color: Colors.grey[700])),
               ]),
               SizedBox(height: 24),
-              _buildInputField('Correo electrónico o nombre de usuario'),
+              _buildInputField('Correo electronico o nombre de usuario'),
               SizedBox(height: 16),
               _buildInputField('Contraseña', isPassword: true),
               SizedBox(height: 24),
