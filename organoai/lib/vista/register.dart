@@ -12,6 +12,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _register() async {
@@ -24,6 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
       await AuthService().registerWithEmail(
         _emailController.text.trim(),
         _passwordController.text.trim(),
+        _nameController.text.trim(), // Replace with the actual third argument
       );
 
       // Navegar a home después del registro exitoso
@@ -47,6 +49,12 @@ class _RegisterPageState extends State<RegisterPage> {
           key: _formKey,
           child: Column(
             children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingresa su nombre' : null,
+              ),
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email'),
