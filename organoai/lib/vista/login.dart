@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:organoai/vista/register.dart';
 import '../vista/foto.dart';
+import '../logica/LogicaLogin.dart'; // Asegúrate de importar AuthService
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  // Controladores para los campos de texto
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false; // Estado para el indicador de carga
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +60,7 @@ class LoginPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const PhotoGallery()), // Si es un Widget
+                  MaterialPageRoute(builder: (context) => const PhotoGallery()),
                 );
               },
             ),
@@ -60,17 +76,27 @@ class LoginPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            _buildInputField('Correo electrónico o nombre de usuario'),
+            _buildInputField(
+              'Correo electrónico',
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+            ),
             const SizedBox(height: 16),
-            _buildInputField('Contraseña', isPassword: true),
+            _buildInputField(
+              'Contraseña',
+              isPassword: true,
+              controller: _passwordController,
+            ),
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1DB954),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: () {},
-              child: const Text('Iniciar sesión'),
+              onPressed: _isLoading ? null : _handleLogin,
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Iniciar sesión'),
             ),
             const SizedBox(height: 16),
             TextButton(
@@ -97,11 +123,45 @@ class LoginPage extends StatelessWidget {
     );
   }
 
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor completa todos los campos')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = await AuthService().loginWithEmail(email, password);
+      if (user != null && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const PhotoGallery()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   Widget _buildSocialButton({
     required IconData icon,
     required String text,
     required Color color,
-    required VoidCallback onPressed, // Ahora recibe una función válida
+    required VoidCallback onPressed,
   }) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
@@ -109,7 +169,7 @@ class LoginPage extends StatelessWidget {
         side: BorderSide(color: Colors.grey[700]!),
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      onPressed: onPressed, // Usa la función correctamente
+      onPressed: onPressed,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -127,9 +187,16 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField(String hint, {bool isPassword = false}) {
+  Widget _buildInputField(
+    String hint, {
+    bool isPassword = false,
+    TextEditingController? controller,
+    TextInputType? keyboardType,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         filled: true,
