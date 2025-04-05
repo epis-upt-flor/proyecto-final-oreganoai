@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+
+import 'package:organoai/vista/foto.dart';
+
 import 'package:organoai/vista/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'vista/foto.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +21,15 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    return MaterialApp(home: PhotoGallery());
+
     return MaterialApp(
       home: LoginPage(),
       routes: {
         '/foto': (context) => PhotoGallery(), // Asegúrate de importar foto.dart
       },
     );
+
   }
 }
