@@ -13,23 +13,37 @@ class AuthService {
           await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
-
       );
 
-      // 2. Guardar datos adicionales en Firestore (opcional)
+      // 2. Enviar correo de verificación
+      final user = userCredential.user;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+
+      // 3. Guardar datos adicionales en Firestore
       await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'nombre': nombre,
         'email': email,
+        'emailVerified': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      throw Exception(_handleAuthError(
-          e.code, e.message)); // Manejo específico de errores de Firebase Auth
+      throw Exception(_handleAuthError(e.code, e.message));
     } catch (e) {
-      throw Exception(
-          'Error inesperado: ${e.toString()}'); // Manejo de otros errores inesperados
+      throw Exception('Error inesperado: ${e.toString()}');
+    }
+  }
+
+  // Reenviar correo de verificación
+  Future<void> resendVerificationEmail() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    } else {
+      throw Exception('Usuario no autenticado o correo ya verificado');
     }
   }
 
@@ -46,6 +60,8 @@ class AuthService {
         return 'Operación no permitida. Contacte con soporte.';
       case 'network-request-failed':
         return 'Error de red. Verifique su conexión a internet.';
+      case 'too-many-requests':
+        return 'Demasiados intentos. Intente más tarde.';
       default:
         return 'Error desconocido: $message';
     }
