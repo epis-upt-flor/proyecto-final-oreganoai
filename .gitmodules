@@ -1,0 +1,3 @@
+[submodule "proyecto-final-oreganoai"]
+	path = proyecto-final-oreganoai
+	url = https://github.com/epis-upt-flor/proyecto-final-oreganoai.git
