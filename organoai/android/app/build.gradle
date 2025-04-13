@@ -16,6 +16,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -31,6 +32,16 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    dependencies {
+    // tus otras dependencias…
+         // si ya tienes esto, mantenlo
+     implementation "androidx.core:core-ktx:1.10.1"
+   // para permitir múltiples dex files si tu app lo necesita
+   implementation "androidx.multidex:multidex:2.0.1"
+
+   coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
     }
 
     buildTypes {

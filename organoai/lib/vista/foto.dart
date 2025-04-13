@@ -3,6 +3,10 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'configuracion.dart';
 
+import '../logica/logicaNotificaciones.dart'; // ajusta el path según tu proyecto
+
+final NotiService notiService = NotiService();
+
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key});
   @override
@@ -141,12 +145,20 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             ),
             SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _scanImages,
+              onPressed: () async {
+                _scanImages(); // tu lógica original
+
+                // Mostrar notificación
+                await notiService.showNotification(
+                  title: 'Escaneo iniciado',
+                  body: 'Estamos analizando las imágenes...',
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              child: Text("Escanear"),
+              child: const Text("Escanear"),
             ),
             SizedBox(height: 20),
           ],
