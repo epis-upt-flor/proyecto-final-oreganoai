@@ -1,34 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'perfil.dart';
 import 'configuracion.dart';
-
-import '../logica/logicaNotificaciones.dart'; // ajusta el path según tu proyecto
-
-final NotiService notiService = NotiService();
+import 'historial.dart';
+import '../datos/escaneos_memoria.dart';
 
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key});
+
   @override
-  // ignore: library_private_types_in_public_api
-  _PhotoGalleryState createState() => _PhotoGalleryState();
+  State<PhotoGallery> createState() => _PhotoGalleryState();
 }
 
 class _PhotoGalleryState extends State<PhotoGallery> {
-  final List<File> _images = []; // Lista para almacenar múltiples imágenes
+  final List<File> _images = [];
   final ImagePicker _picker = ImagePicker();
+  int _selectedIndex = 1; // Empieza en "Tomar Foto"
 
-  // Método para seleccionar imágenes desde la galería
-  Future<void> _pickImages() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage();
-    if (pickedFiles.isNotEmpty) {
-      setState(() {
-        _images.addAll(pickedFiles.map((file) => File(file.path)));
-      });
-    }
-  }
-
-  // Método para tomar una foto con la cámara
+  // Método para tomar una foto
   Future<void> _takePhoto() async {
     final XFile? pickedFile =
         await _picker.pickImage(source: ImageSource.camera);
@@ -39,24 +29,55 @@ class _PhotoGalleryState extends State<PhotoGallery> {
     }
   }
 
-  // Método para redirigir a la vista de escaneo
+  // Método para seleccionar imágenes de la galería
+  Future<void> _pickImages() async {
+    final List<XFile> pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        _images.addAll(pickedFiles.map((file) => File(file.path)));
+      });
+    }
+  }
+
+  // Método para escanear imágenes
+  // Modificación del método _scanImages
   void _scanImages() {
     if (_images.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ScanResultsPage(images: _images),
+          builder: (context) => Scaffold(
+            appBar: AppBar(title: const Text("Resultados del Escaneo")),
+            body: ScanResultsPage(images: _images),
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              backgroundColor: Colors.white,
+              selectedItemColor: Colors.green,
+              unselectedItemColor: Colors.black,
+              type: BottomNavigationBarType.fixed,
+              items: const [
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.history), label: "Historial"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.camera_alt), label: "Tomar Foto"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.person), label: "Perfil"),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.settings), label: "Configuración"),
+              ],
+            ),
+          ),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("No hay imágenes para escanear")),
+        const SnackBar(content: Text("No hay imágenes para escanear")),
       );
     }
   }
 
-  int _selectedIndex = 0;
-
+  // Navegación inferior
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -64,13 +85,21 @@ class _PhotoGalleryState extends State<PhotoGallery> {
 
     switch (index) {
       case 0:
-        // Lógica para Historial
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HistorialPage()),
+        );
         break;
       case 1:
-        _takePhoto();
+        // Se queda aquí y abre la cámara
+        _takePhoto(); // Aquí se abre la cámara al seleccionar "Tomar Foto"
         break;
       case 2:
-        // Lógica para Perfil
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const PerfilPage(nombreUsuario: 'Marcelo')),
+        );
         break;
       case 3:
         Navigator.push(
@@ -85,7 +114,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Galería"),
+        automaticallyImplyLeading: false,
+        title: const Text("Tomar Foto"),
         backgroundColor: Colors.green[700],
         centerTitle: true,
       ),
@@ -101,14 +131,15 @@ class _PhotoGalleryState extends State<PhotoGallery> {
           children: [
             Expanded(
               child: _images.isEmpty
-                  ? Center(
-                      child: Text("No hay imágenes seleccionadas",
+                  ? const Center(
+                      child: Text("No hay imágenes aún",
                           style: TextStyle(color: Colors.black)),
                     )
                   : GridView.builder(
-                      padding: EdgeInsets.all(10),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Muestra 2 imágenes por fila
+                      padding: const EdgeInsets.all(10),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                       ),
@@ -121,7 +152,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                               top: 5,
                               right: 5,
                               child: IconButton(
-                                icon: Icon(Icons.close, color: Colors.red),
+                                icon:
+                                    const Icon(Icons.close, color: Colors.red),
                                 onPressed: () {
                                   setState(() {
                                     _images.removeAt(index);
@@ -134,102 +166,151 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                       },
                     ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _pickImages,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.green[700],
               ),
-              child: Text("Subir Imágenes"),
+              child: const Text("Subir desde galería"),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: () async {
-                _scanImages(); // tu lógica original
-
-                // Mostrar notificación
-                await notiService.showNotification(
-                  title: 'Escaneo iniciado',
-                  body: 'Estamos analizando las imágenes...',
-                );
-              },
+              onPressed: _scanImages,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
               child: const Text("Escanear"),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         backgroundColor: Colors.white,
-        selectedItemColor: Colors.greenAccent,
+        selectedItemColor: Colors.green,
         unselectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(color: Colors.black),
-        unselectedLabelStyle: const TextStyle(color: Colors.black),
-        currentIndex: _selectedIndex,
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.history), label: 'Historial'),
+              icon: Icon(Icons.history), label: "Historial"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.camera_alt), label: 'Tomar Foto'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+              icon: Icon(Icons.camera_alt), label: "Tomar Foto"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: 'Configuración'),
+              icon: Icon(Icons.settings), label: "Configuración"),
         ],
-        onTap: _onItemTapped,
       ),
     );
   }
 }
 
-// Pantalla para mostrar los resultados del escaneo
+// Página vacía para Historial
+class EmptyHistorialPage extends StatelessWidget {
+  const EmptyHistorialPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Historial"),
+        backgroundColor: Colors.green[700],
+      ),
+      body: const Center(
+        child: Text("No hay historial aún."),
+      ),
+    );
+  }
+}
+
+// Página para mostrar resultados de escaneo
 class ScanResultsPage extends StatelessWidget {
   final List<File> images;
 
   const ScanResultsPage({super.key, required this.images});
 
+  String _obtenerFechaActual() {
+    final ahora = DateTime.now();
+    return "${ahora.day.toString().padLeft(2, '0')}/${ahora.month.toString().padLeft(2, '0')}/${ahora.year}";
+  }
+
+  void _guardarEscaneos(BuildContext context) {
+    final fecha = _obtenerFechaActual();
+
+    for (var image in images) {
+      listaEscaneos.add(
+        Escaneo(
+          imagen: image,
+          enfermedad: 'Roya',
+          fecha: fecha,
+          descripcion: 'Hongo Puccinia menthae...',
+          tratamiento: 'Fungicidas, ortiga, neem...',
+        ),
+      );
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Escaneos guardados en el historial.")),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Resultados del Escaneo")),
-      body: ListView.builder(
-        padding: EdgeInsets.all(10),
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 10),
-            elevation: 5,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.file(images[index]),
-                Padding(
-                  padding: const EdgeInsets.all(10),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  elevation: 5,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Nombre de la enfermedad: Roya",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 5),
-                      Text("Fecha de captura: 03/04/2025"),
-                      SizedBox(height: 5),
-                      Text(
-                          "Descripción: La roya en las hojas de orégano es causada por un hongo llamado Puccinia menthae. Este hongo se desarrolla en condiciones húmedas y calurosas, como en la primavera, el verano y el otoño."),
-                      SizedBox(height: 5),
-                      Text(
-                          "Tratamiento: Para tratar la roya en las hojas de orégano, se pueden usar fungicidas, purín de ortiga, cola de caballo, o aceites de neem."),
+                      Image.file(images[index]),
+                      const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Nombre de la enfermedad: Roya",
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            SizedBox(height: 5),
+                            Text("Fecha de captura: Ahora mismo"),
+                            SizedBox(height: 5),
+                            Text("Descripción: Hongo Puccinia menthae..."),
+                            SizedBox(height: 5),
+                            Text("Tratamiento: Fungicidas, ortiga, neem..."),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
-          );
-        },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ElevatedButton.icon(
+              onPressed: () => _guardarEscaneos(context),
+              label: const Text("Guardar"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700],
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
