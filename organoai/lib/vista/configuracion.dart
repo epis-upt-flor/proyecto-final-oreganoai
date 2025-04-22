@@ -17,14 +17,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configuración', style: TextStyle(color: Colors.black)),
+        title:
+            const Text('Configuración', style: TextStyle(color: Colors.black)),
         backgroundColor: const Color(0xFFF5F5DC),
+        centerTitle: true,
         elevation: 0,
       ),
       body: ListView(
         children: [
           SwitchListTile(
-            title: const Text('Notificaciones', style: TextStyle(color: Colors.black)),
+            title: const Text('Notificaciones',
+                style: TextStyle(color: Colors.black)),
             value: _notificationsEnabled,
             onChanged: (bool value) {
               setState(() {
@@ -34,17 +37,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeColor: Colors.black54,
           ),
           ListTile(
-            title: const Text('Contacto', style: TextStyle(color: Colors.black)),
+            title:
+                const Text('Contacto', style: TextStyle(color: Colors.black)),
             trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
             onTap: () {},
           ),
           ListTile(
-            title: const Text('Eliminar cuenta', style: TextStyle(color: Colors.black)),
+            title: const Text('Eliminar cuenta',
+                style: TextStyle(color: Colors.black)),
             trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
             onTap: () => _authService.handleDeleteAccount(context),
           ),
           ListTile(
-            title: const Text('Cerrar sesión', style: TextStyle(color: Colors.black)),
+            title: const Text('Cerrar sesión',
+                style: TextStyle(color: Colors.black)),
             trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
             onTap: () => _authService.handleLogout(context),
           ),
