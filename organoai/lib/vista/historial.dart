@@ -183,9 +183,7 @@ class _HistorialPageState extends State<HistorialPage> {
               // Navegar a la página de Perfil
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        const PerfilPage(nombreUsuario: 'Marcelo')),
+                MaterialPageRoute(builder: (context) => const PerfilPage()),
               );
               break;
             case 3:

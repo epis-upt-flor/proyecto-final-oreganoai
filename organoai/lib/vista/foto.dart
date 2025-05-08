@@ -97,8 +97,7 @@ class _PhotoGalleryState extends State<PhotoGallery> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(
-              builder: (context) => const PerfilPage(nombreUsuario: 'Marcelo')),
+          MaterialPageRoute(builder: (context) => const PerfilPage()),
         );
         break;
       case 3:
