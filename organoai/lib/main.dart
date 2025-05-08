@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:organoai/vista/foto.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:organoai/vista/login.dart';
