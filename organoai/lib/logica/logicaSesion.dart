@@ -1,16 +1,20 @@
-// auth_service.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../vista/login.dart'; // Asegúrate de importar tu LoginPage
 
 class AuthService {
+  // Constructor privado para implementar Singleton
+  AuthService._privateConstructor();
+
+  // Instancia única de AuthService
+  static final AuthService instance = AuthService._privateConstructor();
+
   // Cerrar sesión
   Future<void> handleLogout(BuildContext context) async {
     try {
       // Cerrar sesión solo en Firebase
       await FirebaseAuth.instance.signOut();
-      // await GoogleSignIn().signOut(); // Comentado
 
       if (context.mounted) {
         // Navegar a LoginPage y limpiar el stack de navegación
@@ -58,8 +62,7 @@ class AuthService {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.black54)),
+                child: const Text('Cancelar', style: TextStyle(color: Colors.black54)),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
@@ -94,7 +97,6 @@ class AuthService {
             );
           }
           await FirebaseAuth.instance.signOut();
-          // await GoogleSignIn().signOut(); // Comentado
           if (context.mounted) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -104,11 +106,10 @@ class AuthService {
           }
           return;
         }
-        rethrow; // Re-lanzar otros errores
+        rethrow;
       }
 
       if (context.mounted) {
-        // Navegar a LoginPage y mostrar mensaje de éxito
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),

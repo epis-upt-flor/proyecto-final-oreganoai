@@ -1,33 +1,44 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class NotiService {
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+class NotificacionesService {
+  // Constructor privado para Singleton
+  NotificacionesService._privateConstructor();
+  static final NotificacionesService instance = NotificacionesService._privateConstructor();
+
+  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
 
+  // Flag para habilitar o deshabilitar notificaciones
+  bool _notificationsEnabled = true;
+  bool get notificationsEnabled => _notificationsEnabled;
+
+  void setNotificationsEnabled(bool enabled) {
+    _notificationsEnabled = enabled;
+    print('🔔 [NotificacionesService] notificationsEnabled set to $_notificationsEnabled');
+  }
+
   Future<void> initNotification() async {
-    print('🔔 [NotiService] initNotification() called');
+    print('🔔 [NotificacionesService] initNotification() called');
     if (_isInitialized) {
-      print('🔔 [NotiService] ya inicializado, saliendo');
+      print('🔔 [NotificacionesService] ya inicializado, saliendo');
       return;
     }
 
     final status = await Permission.notification.status;
-    print('🔔 [NotiService] estado permiso antes de request(): $status');
+    print('🔔 [NotificacionesService] estado permiso antes de request(): $status');
     if (status.isDenied || status.isPermanentlyDenied) {
       final newStatus = await Permission.notification.request();
-      print('🔔 [NotiService] estado permiso después de request(): $newStatus');
+      print('🔔 [NotificacionesService] estado permiso después de request(): $newStatus');
       if (!newStatus.isGranted) {
-        print('⚠️ [NotiService] permiso denegado, no se inicializa');
+        print('⚠️ [NotificacionesService] permiso denegado, no se inicializa');
         return;
       }
     }
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(
       android: androidSettings,
       iOS: DarwinInitializationSettings(),
@@ -35,12 +46,11 @@ class NotiService {
 
     await notificationsPlugin.initialize(settings,
         onDidReceiveNotificationResponse: (response) {
-      print('🔔 [NotiService] onDidReceiveNotificationResponse: '
-          '${response.payload}');
+      print('🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
     });
 
     _isInitialized = true;
-    print('🔔 [NotiService] inicializado con éxito');
+    print('🔔 [NotificacionesService] inicializado con éxito');
   }
 
   NotificationDetails notificationDetails() {
@@ -61,18 +71,20 @@ class NotiService {
     String? title,
     String? body,
   }) async {
-    print('🔔 [NotiService] showNotification() called');
+    print('🔔 [NotificacionesService] showNotification() called');
+    if (!_notificationsEnabled) {
+      print('🔕 [NotificacionesService] notificaciones desactivadas');
+      return;
+    }
     if (!_isInitialized) {
-      print(
-          '⚠️ [NotiService] no está inicializado, llamando a initNotification()');
+      print('⚠️ [NotificacionesService] no está inicializado, llamando a initNotification()');
       await initNotification();
       if (!_isInitialized) {
-        print(
-            '❌ [NotiService] initNotification falló, no se muestra notificación');
+        print('❌ [NotificacionesService] initNotification falló, no se muestra notificación');
         return;
       }
     }
     await notificationsPlugin.show(id, title, body, notificationDetails());
-    print('✅ [NotiService] notificación enviada: $title / $body');
+    print('✅ [NotificacionesService] notificación enviada: $title / $body');
   }
 }
