@@ -1,15 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// Escribir datos
-Future<void> addUser(String name, String email) async {
-  await FirebaseFirestore.instance.collection('users').add({
-    'name': name,
-    'email': email,
-    'createdAt': FieldValue.serverTimestamp(),
-  });
-}
+class FirebaseConexion {
+  // Constructor privado para implementar Singleton
+  FirebaseConexion._privateConstructor();
 
-// Leer datos
-Stream<QuerySnapshot> getUsers() {
-  return FirebaseFirestore.instance.collection('users').snapshots();
+  // Instancia única
+  static final FirebaseConexion instance = FirebaseConexion._privateConstructor();
+
+  // Instancia de FirebaseFirestore
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Escribir datos
+  Future<void> addUser(String name, String email) async {
+    await _firestore.collection('users').add({
+      'name': name,
+      'email': email,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Leer datos
+  Stream<QuerySnapshot> getUsers() {
+    return _firestore.collection('users').snapshots();
+  }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import '../datos/escaneos_memoria.dart';
 import 'package:organoai/vista/foto.dart';
 import 'package:organoai/vista/perfil.dart';
