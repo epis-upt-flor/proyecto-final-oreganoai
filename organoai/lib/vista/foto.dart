@@ -7,7 +7,7 @@ import 'historial.dart';
 import '../datos/escaneos_memoria.dart';
 import '../logica/logicaNotificaciones.dart';
 
-final NotiService notiService = NotiService();
+final NotificacionesService notiService = NotificacionesService.instance; // Replace 'instance' with the correct named constructor
 
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key});
@@ -180,14 +180,15 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
+                
+
+                // Llamar al método para escanear imágenes
+                _scanImages();
                 // Mostrar la notificación cuando se presiona el botón
                 await notiService.showNotification(
                   title: 'Escaneo iniciado',
                   body: 'Estamos analizando las imágenes...',
                 );
-
-                // Llamar al método para escanear imágenes
-                _scanImages();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
