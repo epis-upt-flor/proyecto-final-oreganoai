@@ -5,7 +5,6 @@ import 'perfil.dart';
 import 'configuracion.dart';
 import 'historial.dart';
 import '../datos/escaneos_memoria.dart';
-
 import '../logica/logicaNotificaciones.dart';
 import '../datos/conexionApi.dart';
 
@@ -59,7 +58,12 @@ class _PhotoGalleryState extends State<PhotoGallery> {
           context,
           MaterialPageRoute(
             builder: (context) => Scaffold(
-              appBar: AppBar(title: const Text("Resultados del Escaneo")),
+              appBar: AppBar(
+                automaticallyImplyLeading: false,
+                title: const Text("Resultados del Escaneo"),
+                backgroundColor: Colors.green[700],
+                centerTitle: true,
+              ),
               body: ScanResultsPage(
                 images: _images,
                 apiResponse: response,
@@ -265,36 +269,6 @@ class ScanResultsPage extends StatelessWidget {
     required this.apiResponse,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...images.map((image) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Image.file(image),
-              )),
-          const SizedBox(height: 20),
-          const Text(
-            "Respuesta de la API:",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 10),
-          Text(apiResponse.toString()),
-        ],
-      ),
-    );
-  }
-}
-
-// Widget para mostrar historial de escaneos con imágenes
-class HistorialConImagenesPage extends StatelessWidget {
-  final List<File> images;
-
-  const HistorialConImagenesPage({super.key, required this.images});
-
   String _obtenerFechaActual() {
     final ahora = DateTime.now();
     return "${ahora.day.toString().padLeft(2, '0')}/${ahora.month.toString().padLeft(2, '0')}/${ahora.year}";
@@ -307,10 +281,10 @@ class HistorialConImagenesPage extends StatelessWidget {
       listaEscaneos.add(
         Escaneo(
           imagen: image,
-          enfermedad: 'Roya',
+          enfermedad: apiResponse['tipo'] ?? 'Desconocida',
           fecha: fecha,
-          descripcion: 'Hongo Puccinia menthae...',
-          tratamiento: 'Fungicidas, ortiga, neem...',
+          descripcion: apiResponse['descripcion'] ?? 'No disponible',
+          tratamiento: apiResponse['tratamiento'] ?? 'Consultar especialista',
         ),
       );
     }
@@ -323,56 +297,37 @@ class HistorialConImagenesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: images.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  elevation: 5,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.file(images[index]),
-                      const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Nombre de la enfermedad: Roya",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            SizedBox(height: 5),
-                            Text("Fecha de captura: Ahora mismo"),
-                            SizedBox(height: 5),
-                            Text("Descripción: Hongo Puccinia menthae..."),
-                            SizedBox(height: 5),
-                            Text("Tratamiento: Fungicidas, ortiga, neem..."),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...images.map((image) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Image.file(image),
+                )),
+            const SizedBox(height: 20),
+            const Text(
+              "Respuesta de la API:",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: ElevatedButton.icon(
-              onPressed: () => _guardarEscaneos(context),
-              label: const Text("Guardar"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[700],
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            const SizedBox(height: 10),
+            Text(apiResponse.toString()),
+            const SizedBox(height: 30),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: () => _guardarEscaneos(context),
+                label: const Text("Guardar"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green[700],
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
