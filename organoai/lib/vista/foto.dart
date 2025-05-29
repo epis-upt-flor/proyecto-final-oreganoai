@@ -7,6 +7,7 @@ import 'historial.dart';
 import '../datos/escaneos_memoria.dart';
 import '../logica/logicaNotificaciones.dart';
 import '../datos/conexionApi.dart';
+import '../logica/logicaEscaneo.dart';
 
 final NotificacionesService notiService = NotificacionesService
     .instance; // Replace 'instance' with the correct named constructor
@@ -316,7 +317,11 @@ class ScanResultsPage extends StatelessWidget {
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton.icon(
-                onPressed: () => _guardarEscaneos(context),
+                //onPressed: () => _guardarEscaneos(context),
+                onPressed: () {
+                  final logicaEscaneo = LogicaEscaneo();
+                  logicaEscaneo.guardarEscaneo(context, images, apiResponse);
+                },
                 label: const Text("Guardar"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
