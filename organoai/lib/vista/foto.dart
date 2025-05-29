@@ -6,6 +6,12 @@ import 'configuracion.dart';
 import 'historial.dart';
 import '../datos/escaneos_memoria.dart';
 
+import '../logica/logicaNotificaciones.dart';
+import '../datos/conexionApi.dart';
+
+final NotificacionesService notiService = NotificacionesService
+    .instance; // Replace 'instance' with the correct named constructor
+
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key});
 
@@ -41,35 +47,49 @@ class _PhotoGalleryState extends State<PhotoGallery> {
 
   // Método para escanear imágenes
   // Modificación del método _scanImages
-  void _scanImages() {
+  Future<void> _scanImages() async {
     if (_images.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Scaffold(
-            appBar: AppBar(title: const Text("Resultados del Escaneo")),
-            body: ScanResultsPage(images: _images),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
-              backgroundColor: Colors.white,
-              selectedItemColor: Colors.green,
-              unselectedItemColor: Colors.black,
-              type: BottomNavigationBarType.fixed,
-              items: const [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.history), label: "Historial"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.camera_alt), label: "Tomar Foto"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.person), label: "Perfil"),
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.settings), label: "Configuración"),
-              ],
+      try {
+        // Llamar a la API usando la primera imagen de la lista
+        final response = await ConexionApi().predictImage(_images.first.path);
+        print("Enviando imagen: ${_images.first.path}");
+        print("Respuesta API: $response");
+        // Navegar a la pantalla de resultados, pasando la respuesta de la API
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              appBar: AppBar(title: const Text("Resultados del Escaneo")),
+              body: ScanResultsPage(
+                images: _images,
+                apiResponse: response,
+              ),
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                backgroundColor: Colors.white,
+                selectedItemColor: Colors.green,
+                unselectedItemColor: Colors.black,
+                type: BottomNavigationBarType.fixed,
+                items: const [
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.history), label: "Historial"),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.camera_alt), label: "Tomar Foto"),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.person), label: "Perfil"),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.settings), label: "Configuración"),
+                ],
+              ),
             ),
           ),
-        ),
-      );
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error al procesar la imagen: $e")),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No hay imágenes para escanear")),
@@ -176,7 +196,15 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _scanImages,
+              onPressed: () async {
+                // Llamar al método para escanear imágenes
+                _scanImages();
+                // Mostrar la notificación cuando se presiona el botón
+                await notiService.showNotification(
+                  title: 'Escaneo iniciado',
+                  body: 'Estamos analizando las imágenes...',
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
@@ -229,8 +257,43 @@ class EmptyHistorialPage extends StatelessWidget {
 // Página para mostrar resultados de escaneo
 class ScanResultsPage extends StatelessWidget {
   final List<File> images;
+  final Map<String, dynamic> apiResponse;
 
-  const ScanResultsPage({super.key, required this.images});
+  const ScanResultsPage({
+    super.key,
+    required this.images,
+    required this.apiResponse,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...images.map((image) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Image.file(image),
+              )),
+          const SizedBox(height: 20),
+          const Text(
+            "Respuesta de la API:",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 10),
+          Text(apiResponse.toString()),
+        ],
+      ),
+    );
+  }
+}
+
+// Widget para mostrar historial de escaneos con imágenes
+class HistorialConImagenesPage extends StatelessWidget {
+  final List<File> images;
+
+  const HistorialConImagenesPage({super.key, required this.images});
 
   String _obtenerFechaActual() {
     final ahora = DateTime.now();

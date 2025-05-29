@@ -1,6 +1,6 @@
-// configuracion.dart
 import 'package:flutter/material.dart';
 import '../logica/logicaSesion.dart'; // Importa la clase AuthService
+import '../logica/logicaNotificaciones.dart'; // Importa NotificacionesService
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,7 +11,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
-  final AuthService _authService = AuthService(); // Instancia de AuthService
+  final AuthService _authService = AuthService.instance; // Usando Singleton
+  final NotificacionesService _notificacionesService =
+      NotificacionesService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (bool value) {
               setState(() {
                 _notificationsEnabled = value;
+                _notificacionesService.setNotificationsEnabled(value);
               });
             },
             activeColor: Colors.black54,
