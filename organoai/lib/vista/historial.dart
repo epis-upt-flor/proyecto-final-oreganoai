@@ -8,7 +8,7 @@ import 'perfil.dart';
 import 'configuracion.dart';
 
 class HistorialPage extends StatefulWidget {
-  const HistorialPage({Key? key}) : super(key: key);
+  const HistorialPage({super.key});
 
   @override
   State<HistorialPage> createState() => _HistorialPageState();
