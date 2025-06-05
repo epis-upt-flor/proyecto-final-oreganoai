@@ -11,6 +11,8 @@ app = Flask(__name__)
 # Construye la ruta absoluta al modelo
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Carpeta donde est� main.py
 MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
+DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_detector_enfermedades.h5")
+DISEASE_CLASS_NAMES = ['ALTERNARIA', 'OIDIO', 'OREGANO SANO', 'ROYA']
 
 # Umbral ajustable para clasificaci�n binaria
 THRESHOLD = 0.5
@@ -49,6 +51,14 @@ def predict():
                 "clasificacion": "ES OR�GANO",
                 "confianza": f"{proba * 100:.2f}%"
             }
+            try:
+                disease_model = load_model(DISEASE_MODEL_PATH)
+                disease_pred = disease_model.predict(img_array)
+                disease_idx = int(np.argmax(disease_pred))
+                disease_conf = float(np.max(disease_pred))
+                resultado["plaga"] = f"Enefermedad detectada: {DISEASE_CLASS_NAMES[disease_idx]} (Confianza: {disease_conf * 100:.2f}%)"
+            except Exception as e:
+                resultado["plaga"] = f"Error al detectar plaga: {e}"
         else:
             resultado = {
                 "clasificacion": "NO ES OR�GANO",
