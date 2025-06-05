@@ -34,31 +34,33 @@ def predict():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
-    try:
-        # Cargar y procesar imagen
-        img = Image.open(io.BytesIO(file.read())).convert("RGB")
-        img = img.resize((224, 224))  # Ajustar tama�o seg�n modelo
-        img_array = np.array(img) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-
-        # Predicci�n
-        prediction = model.predict(img_array)
-        proba = float(prediction[0][0])  # Asumimos salida binaria [0..1]
-
-        # Clasificaci�n con umbral
-        if proba > THRESHOLD:
-            resultado = {
-                "clasificacion": "ES OR�GANO",
-                "confianza": f"{proba * 100:.2f}%"
-            }
-            try:
+     try:
                 disease_model = load_model(DISEASE_MODEL_PATH)
-                disease_pred = disease_model.predict(img_array)
-                disease_idx = int(np.argmax(disease_pred))
-                disease_conf = float(np.max(disease_pred))
-                resultado["plaga"] = f"Enefermedad detectada: {DISEASE_CLASS_NAMES[disease_idx]} (Confianza: {disease_conf * 100:.2f}%)"
+                
+                # --- EXCEPCIONES AÑADIDAS AQUÍ ---
+            except FileNotFoundError:
+                resultado["plaga"] = f"Error: El archivo del modelo de detección de enfermedades no se encontró en '{DISEASE_MODEL_PATH}'."
+            except ImportError:
+                resultado["plaga"] = "Error al cargar el modelo de detección de enfermedades: Asegúrate de que TensorFlow/Keras estén instalados y sean compatibles."
+            except ValueError as e:
+                resultado["plaga"] = f"Error de valor al cargar el modelo de detección de enfermedades (posiblemente un archivo corrupto o formato incorrecto): {e}"
             except Exception as e:
-                resultado["plaga"] = f"Error al detectar plaga: {e}"
+                resultado["plaga"] = f"Error inesperado al cargar el modelo de detección de enfermedades: {e}"
+                # --- FIN DE EXCEPCIONES AÑADIDAS ---
+
+            else: # Este 'else' se ejecuta si el bloque 'try' (de carga del modelo de enfermedad) no lanzó ninguna excepción
+                try:
+                    # Si el modelo se cargó correctamente, procede con la predicción de la enfermedad
+                    disease_pred = disease_model.predict(img_array)
+                    disease_idx = int(np.argmax(disease_pred))
+                    disease_conf = float(np.max(disease_pred))
+
+                    if disease_idx < 0 or disease_idx >= len(DISEASE_CLASS_NAMES):
+                        resultado["plaga"] = "Advertencia: El modelo de enfermedades predijo una clase fuera de rango."
+                    else:
+                        resultado["plaga"] = f"Enfermedad detectada: {DISEASE_CLASS_NAMES[disease_idx]} (Confianza: {disease_conf * 100:.2f}%)"
+                except Exception as e:
+                    resultado["plaga"] = f"Error al realizar la predicción de enfermedad: {e}"
         else:
             resultado = {
                 "clasificacion": "NO ES OR�GANO",
