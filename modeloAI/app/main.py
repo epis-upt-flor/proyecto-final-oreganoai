@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Construye la ruta absoluta al modelo
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Carpeta donde est� main.py
 MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
-DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_detector_enfermedades.h5")
+DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_detector_enfermedadesV1.h5")
 DISEASE_CLASS_NAMES = ['ALTERNARIA', 'OIDIO', 'OREGANO SANO', 'ROYA']
 
 # Umbral ajustable para clasificaci�n binaria
