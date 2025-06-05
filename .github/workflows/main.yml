@@ -1,0 +1,29 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests targeting the main branch
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # Checks out the repository code
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username from secrets
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password or token from secrets
+
+      - name: Build Docker image
+        run: docker build -t gabrielmelendezhuarachi/flask-cnn-api:latest modeloAI/
+
+      - name: Push Docker image
+        run: docker push gabrielmelendezhuarachi/flask-cnn-api:latest
