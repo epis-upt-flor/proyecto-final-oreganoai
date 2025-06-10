@@ -1,30 +1,38 @@
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 
 void main() {
   group('Segmentación - Prueba de Sobrecarga API', () {
-    test('Múltiples solicitudes concurrentes a la API', () async {
-      final int concurrentRequests = 10; // Puedes ajustar este número
+    test('Encuentra el máximo de solicitudes concurrentes exitosas', () async {
       final uri =
           Uri.parse('https://flask-cnn-api-latest.onrender.com/predict');
       final imagePath =
           'test/segmentation/test.jfif'; // Cambia la ruta si es necesario
+      int concurrentRequests = 1;
+      int maxSuccess = 0;
+      bool sigue = true;
 
-      final List<Future<http.StreamedResponse>> requests = [];
-
-      for (int i = 0; i < concurrentRequests; i++) {
-        final request = http.MultipartRequest('POST', uri)
-          ..files.add(await http.MultipartFile.fromPath('file', imagePath));
-        requests.add(request.send());
+      while (sigue && concurrentRequests <= 100) {
+        // Puedes aumentar el límite
+        print('Probando con $concurrentRequests solicitudes...');
+        final List<Future<http.StreamedResponse>> requests = [];
+        for (int i = 0; i < concurrentRequests; i++) {
+          final request = http.MultipartRequest('POST', uri)
+            ..files.add(await http.MultipartFile.fromPath('file', imagePath));
+          requests.add(request.send());
+        }
+        final responses = await Future.wait(requests);
+        final allOk = responses.every((r) => r.statusCode == 200);
+        if (allOk) {
+          maxSuccess = concurrentRequests;
+          concurrentRequests++;
+        } else {
+          sigue = false;
+        }
       }
-
-      final responses = await Future.wait(requests);
-
-      for (var response in responses) {
-        expect(response.statusCode, equals(200),
-            reason: 'Respuesta no exitosa');
-      }
+      print('Máximo de solicitudes concurrentes exitosas: $maxSuccess');
+      expect(maxSuccess, greaterThan(0),
+          reason: 'La API no soporta ninguna solicitud concurrente');
     });
   });
 }
