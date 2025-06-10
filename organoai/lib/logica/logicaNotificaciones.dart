@@ -2,11 +2,20 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class NotificacionesService {
-  // Constructor privado para Singleton
-  NotificacionesService._privateConstructor();
+     set isInitialized(bool value) => _isInitialized = value;
+  set notificationsEnabled(bool value) => _notificationsEnabled = value;
+
+  // Singleton
+  NotificacionesService._privateConstructor()
+      : notificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  // Constructor para inyección de dependencias (test)
+  NotificacionesService.withPlugin(this.notificationsPlugin);
+
   static final NotificacionesService instance = NotificacionesService._privateConstructor();
 
-  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin notificationsPlugin;
+
 
   bool _isInitialized = false;
   bool get isInitialized => _isInitialized;
