@@ -14,6 +14,7 @@ class ScanService {
   Future<void> guardarEscaneo({
     required String tipoEnfermedad,
     required String descripcion,
+    required String tratamiento,
     required DateTime fechaEscaneo,
     required String urlImagen, // URL de la imagen subida a ImgBB
   }) async {
@@ -29,6 +30,7 @@ class ScanService {
           .add({
         'tipoEnfermedad': tipoEnfermedad,
         'descripcion': descripcion,
+        'tramiento': tratamiento,
         'fechaEscaneo': Timestamp.fromDate(fechaEscaneo),
         'urlImagen': urlImagen,
         'createdAt': FieldValue.serverTimestamp(),
@@ -102,22 +104,47 @@ class LogicaEscaneo {
       );
       return;
     }
+
     try {
       final DateTime now = DateTime.now();
-      // Se toma la primera imagen. Si deseas subir más imágenes, puedes iterar.
       final File image = images.first;
 
-      // Subir imagen a ImgBB
+      // 1. Subir imagen a ImgBB
       final String downloadUrl = await _uploadImageToImgbb(image);
 
-      // Extraer datos de la respuesta de la API
-      final String tipo = apiResponse['plaga'] ?? 'Desconocida';
-      final String descripcion = apiResponse['descripcion'] ?? 'No disponible';
+      // 2. Extraer tipo de enfermedad desde el texto de la API
+      final rawTipo =
+          (apiResponse['plaga'] ?? 'Desconocida').toString().toLowerCase();
 
-      // Guardar el escaneo en Firestore a través de ScanService usando la URL devuelta por ImgBB
+      // Método para extraer la enfermedad del texto
+      final RegExp exp =
+          RegExp(r'enfermedad detectada:\s*([\w\s]+)', caseSensitive: false);
+      final match = exp.firstMatch(rawTipo);
+      final String tipo =
+          match != null ? match.group(1)!.trim().toLowerCase() : 'desconocida';
+
+      // 3. Buscar la enfermedad en Firestore
+      String descripcion = "No disponible";
+      String tratamiento = "No disponible";
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('enfermedad')
+          .where('nombre', isGreaterThanOrEqualTo: tipo)
+          .where('nombre', isLessThan: tipo + 'z')
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final data = querySnapshot.docs.first.data();
+        descripcion = data['descripcion'] ?? descripcion;
+        tratamiento = data['tratamiento'] ?? tratamiento;
+      }
+
+      // 4. Guardar escaneo
       await _scanService.guardarEscaneo(
         tipoEnfermedad: tipo,
         descripcion: descripcion,
+        tratamiento: tratamiento,
         fechaEscaneo: now,
         urlImagen: downloadUrl,
       );
