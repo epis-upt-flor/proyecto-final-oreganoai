@@ -111,7 +111,7 @@ class LogicaEscaneo {
       final String downloadUrl = await _uploadImageToImgbb(image);
 
       // Extraer datos de la respuesta de la API
-      final String tipo = apiResponse['tipo'] ?? 'Desconocida';
+      final String tipo = apiResponse['plaga'] ?? 'Desconocida';
       final String descripcion = apiResponse['descripcion'] ?? 'No disponible';
 
       // Guardar el escaneo en Firestore a través de ScanService usando la URL devuelta por ImgBB
