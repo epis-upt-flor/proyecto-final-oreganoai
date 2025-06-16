@@ -146,4 +146,4 @@ def detect_oregano_diseases():
 if __name__ == '__main__':
     # Cuando ejecutas Flask en un entorno como Colab o en un servidor,
     # el host '0.0.0.0' permite que sea accesible desde fuera del contenedor/máquina virtual.
-    app.run(host='0.0.0.0', port=5000, debug=True) # debug=True es bueno para desarrollo
+    app.run(host='0.0.0.0', port=5000, debug=False) # debug=True es bueno para desarrollo
