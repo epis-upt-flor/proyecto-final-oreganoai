@@ -12,7 +12,7 @@ void main() {
   late ScanServiceTestable scanService;
 
   setUp(() {
-    print('🔧 Inicializando test...');
+    print('Inicializando test...');
     // Usuario mock con datos personalizados
     mockUser = MockUser(
       uid: 'test_uid',
@@ -30,8 +30,8 @@ void main() {
     );
   });
 
-  test('📄 obtenerEscaneos devuelve lista de escaneos del usuario', () async {
-    print('📥 Agregando documento falso a Firestore...');
+  test('obtenerEscaneos devuelve lista de escaneos del usuario', () async {
+    print('Agregando documento falso a Firestore...');
     final escaneosRef =
         firestore.collection('users').doc(mockUser.uid).collection('escaneos');
 
@@ -43,12 +43,12 @@ void main() {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    print('📤 Ejecutando scanService.obtenerEscaneos()...');
+    print('Ejecutando scanService.obtenerEscaneos()...');
     final resultado = await scanService.obtenerEscaneos();
 
-    print('✅ Resultado obtenido:');
+    print('Resultado obtenido:');
     for (var i = 0; i < resultado.length; i++) {
-      print('📝 Escaneo #$i');
+      print('Escaneo #$i');
       resultado[i].forEach((key, value) {
         print('   - $key: $value');
       });
@@ -58,7 +58,7 @@ void main() {
     expect(resultado[0]['tipoEnfermedad'], 'Royas');
     expect(resultado[0]['descripcion'], 'Hongos visibles');
     expect(resultado[0]['urlImagen'], 'https://ejemplo.com/imagen.jpg');
-    print('🎉 Test finalizado correctamente.');
+    print('Test finalizado correctamente.');
   });
 }
 
