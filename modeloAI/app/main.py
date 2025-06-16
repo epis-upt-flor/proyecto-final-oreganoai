@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 from tensorflow.keras.models import load_model # Para tu modelo de clasificación de enfermedades
 from PIL import Image
 import io
-import cv2 # Necesario para procesar imágenes con YOLO y recortar
+ # Necesario para procesar imágenes con YOLO y recortar
 
 # Importar YOLO de ultralytics
 from ultralytics import YOLO
