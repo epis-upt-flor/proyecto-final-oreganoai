@@ -1,3 +1,5 @@
 flask
 tensorflow==2.18.0
 pillow
+ultralytics
+opencv-python-headless
