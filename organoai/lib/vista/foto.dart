@@ -52,8 +52,8 @@ class _PhotoGalleryState extends State<PhotoGallery> {
       try {
         // Llamar a la API usando la primera imagen de la lista
         final response = await ConexionApi().predictImage(_images.first.path);
-        print("Enviando imagen: ${_images.first.path}");
-        print("Respuesta API: $response");
+        //print("Enviando imagen: ${_images.first.path}");
+        //print("Respuesta API: $response");
         // Navegar a la pantalla de resultados, pasando la respuesta de la API
         Navigator.push(
           context,
