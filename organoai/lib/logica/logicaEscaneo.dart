@@ -30,7 +30,7 @@ class ScanService {
           .add({
         'tipoEnfermedad': tipoEnfermedad,
         'descripcion': descripcion,
-        'tramiento': tratamiento,
+        'tratamiento': tratamiento,
         'fechaEscaneo': Timestamp.fromDate(fechaEscaneo),
         'urlImagen': urlImagen,
         'createdAt': FieldValue.serverTimestamp(),
@@ -128,11 +128,12 @@ class LogicaEscaneo {
       String tratamiento = "No disponible";
 
       final querySnapshot = await FirebaseFirestore.instance
-        .collection('enfermedad')
-        .where('nombre', isGreaterThanOrEqualTo: tipo)
-        .where('nombre', isLessThan: '${tipo}z') // ← Aquí se usa interpolación
-        .limit(1)
-        .get();
+          .collection('enfermedad')
+          .where('nombre', isGreaterThanOrEqualTo: tipo)
+          .where('nombre',
+              isLessThan: '${tipo}z') // ← Aquí se usa interpolación
+          .limit(1)
+          .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         final data = querySnapshot.docs.first.data();
