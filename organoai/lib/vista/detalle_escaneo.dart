@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'foto.dart';
+import 'historial.dart';
+import 'perfil.dart';
+import 'configuracion.dart';
 
 class DetalleEscaneoPage extends StatelessWidget {
   final String tipoEnfermedad;
@@ -22,6 +26,7 @@ class DetalleEscaneoPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Detalle del Escaneo'),
         backgroundColor: Colors.green[700],
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

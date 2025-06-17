@@ -188,7 +188,7 @@ class _HistorialPageState extends State<HistorialPage> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         Text(
-                                            "Tratamiento: ${e['tratamiento'] ?? ''}"),
+                                            "Tratamiento: ${e['tratamiento'] ?? 'No disponible'}"),
                                       ],
                                     ),
                                     onTap: () {
@@ -199,7 +199,8 @@ class _HistorialPageState extends State<HistorialPage> {
                                             tipoEnfermedad:
                                                 e['tipoEnfermedad'] ?? '',
                                             descripcion: e['descripcion'] ?? '',
-                                            tratamiento: e['tratamiento'] ?? '',
+                                            tratamiento: e['tratamiento'] ??
+                                                'No disponible',
                                             urlImagen: e['urlImagen'] ?? '',
                                             fecha: fecha,
                                           ),

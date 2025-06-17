@@ -65,7 +65,7 @@ class LogicaEscaneo {
   // Clave API de ImgBB y URL de subida
   static const String _apiKey = "a2cf28f997aaa0388316413335a4a969";
   static const String _uploadUrl =
-      "https://api.imgbb.com/1/upload?expiration=600&key=$_apiKey";
+      "https://api.imgbb.com/1/upload?key=$_apiKey";
 
   /// Sube la imagen a ImgBB y regresa la URL resultante
   Future<String> _uploadImageToImgbb(File image) async {
