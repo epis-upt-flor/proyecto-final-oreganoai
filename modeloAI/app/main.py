@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Ruta a tu modelo YOLOv8n (debe ser un archivo .pt)
 # ASUMIMOS que este es tu verdadero modelo YOLO entrenado para detectar 'oregano'
 # Si tu modelo YOLOv8n se llama diferente, ajusta esta ruta.
-YOLO_MODEL_PATH = os.path.join(BASE_DIR, "best.pt") # Cambiado a 'best.pt' para consistencia con recomendación anterior
+YOLO_MODEL_PATH = os.path.join(BASE_DIR, "oreganoDetectorYOLOv1.pt") # Cambiado a 'best.pt' para consistencia con recomendación anterior
 
 # Ruta a tu modelo de clasificación de enfermedades (Keras .keras o .h5)
 DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oregano_ligero.keras")
