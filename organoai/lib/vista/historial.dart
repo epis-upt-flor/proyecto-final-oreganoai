@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'foto.dart';
 import 'perfil.dart';
 import 'configuracion.dart';
+import 'detalle_escaneo.dart';
 
 class HistorialPage extends StatefulWidget {
   const HistorialPage({super.key});
@@ -158,35 +159,55 @@ class _HistorialPageState extends State<HistorialPage> {
                               ),
                               const SizedBox(height: 5),
                               ...escaneos.map((e) => Card(
-                                    margin:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    elevation: 4,
-                                    child: ListTile(
-                                      contentPadding: const EdgeInsets.all(10),
-                                      leading: e['urlImagen'] != null
-                                          ? NetworkImageByHttp(
-                                              url: e['urlImagen'] ?? '',
-                                              width: 70,
-                                              height: 70,
-                                            )
-                                          : const Icon(
-                                              Icons.image_not_supported),
-                                      title: Text(
-                                        e['tipoEnfermedad'] ?? '',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      subtitle: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text("Fecha: $fecha"),
-                                          Text(
-                                              "Descripción: ${e['descripcion'] ?? ''}"),
-                                        ],
-                                      ),
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  elevation: 4,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(10),
+                                    leading: e['urlImagen'] != null
+                                        ? NetworkImageByHttp(
+                                            url: e['urlImagen'] ?? '',
+                                            width: 70,
+                                            height: 70,
+                                          )
+                                        : const Icon(Icons.image_not_supported),
+                                    title: Text(
+                                      e['tipoEnfermedad'] ?? '',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  )),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("Fecha: $fecha"),
+                                        Text(
+                                          "Descripción: ${e['descripcion'] ?? ''}",
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                            "Tratamiento: ${e['tratamiento'] ?? 'No disponible'}"),
+                                      ],
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => DetalleEscaneoPage(
+                                            tipoEnfermedad:
+                                                e['tipoEnfermedad'] ?? '',
+                                            descripcion: e['descripcion'] ?? '',
+                                            tratamiento: e['tratamiento'] ??
+                                                'No disponible',
+                                            urlImagen: e['urlImagen'] ?? '',
+                                            fecha: fecha,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ))),
                               const SizedBox(height: 20),
                             ],
                           );
