@@ -128,11 +128,11 @@ class LogicaEscaneo {
       String tratamiento = "No disponible";
 
       final querySnapshot = await FirebaseFirestore.instance
-          .collection('enfermedad')
-          .where('nombre', isGreaterThanOrEqualTo: tipo)
-          .where('nombre', isLessThan: tipo + 'z')
-          .limit(1)
-          .get();
+        .collection('enfermedad')
+        .where('nombre', isGreaterThanOrEqualTo: tipo)
+        .where('nombre', isLessThan: '${tipo}z') // ← Aquí se usa interpolación
+        .limit(1)
+        .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         final data = querySnapshot.docs.first.data();
