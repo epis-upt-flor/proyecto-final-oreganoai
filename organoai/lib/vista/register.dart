@@ -1,14 +1,18 @@
+// register.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:organoai/logica/logicaRegister.dart';
 
+/// Página pública para registro de usuarios.
 class RegisterPage extends StatefulWidget {
+  /// Constructor público con llave opcional.
   const RegisterPage({super.key});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
+// Clase de estado privada (estándar en Flutter)
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();

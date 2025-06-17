@@ -26,23 +26,23 @@ class NotificacionesService {
 
   void setNotificationsEnabled(bool enabled) {
     _notificationsEnabled = enabled;
-    print('🔔 [NotificacionesService] notificationsEnabled set to $_notificationsEnabled');
+    //print('🔔 [NotificacionesService] notificationsEnabled set to $_notificationsEnabled');
   }
 
   Future<void> initNotification() async {
-    print('🔔 [NotificacionesService] initNotification() called');
+    //print('🔔 [NotificacionesService] initNotification() called');
     if (_isInitialized) {
-      print('🔔 [NotificacionesService] ya inicializado, saliendo');
+      //print('🔔 [NotificacionesService] ya inicializado, saliendo');
       return;
     }
 
     final status = await Permission.notification.status;
-    print('🔔 [NotificacionesService] estado permiso antes de request(): $status');
+    //print('🔔 [NotificacionesService] estado permiso antes de request(): $status');
     if (status.isDenied || status.isPermanentlyDenied) {
       final newStatus = await Permission.notification.request();
-      print('🔔 [NotificacionesService] estado permiso después de request(): $newStatus');
+      //print('🔔 [NotificacionesService] estado permiso después de request(): $newStatus');
       if (!newStatus.isGranted) {
-        print('⚠️ [NotificacionesService] permiso denegado, no se inicializa');
+        //print('⚠️ [NotificacionesService] permiso denegado, no se inicializa');
         return;
       }
     }
@@ -55,11 +55,11 @@ class NotificacionesService {
 
     await notificationsPlugin.initialize(settings,
         onDidReceiveNotificationResponse: (response) {
-      print('🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
+      //print('🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
     });
 
     _isInitialized = true;
-    print('🔔 [NotificacionesService] inicializado con éxito');
+    //print('🔔 [NotificacionesService] inicializado con éxito');
   }
 
   NotificationDetails notificationDetails() {
@@ -80,20 +80,20 @@ class NotificacionesService {
     String? title,
     String? body,
   }) async {
-    print('🔔 [NotificacionesService] showNotification() called');
+    //print('🔔 [NotificacionesService] showNotification() called');
     if (!_notificationsEnabled) {
-      print('🔕 [NotificacionesService] notificaciones desactivadas');
+      //print('🔕 [NotificacionesService] notificaciones desactivadas');
       return;
     }
     if (!_isInitialized) {
-      print('⚠️ [NotificacionesService] no está inicializado, llamando a initNotification()');
+      //print('⚠️ [NotificacionesService] no está inicializado, llamando a initNotification()');
       await initNotification();
       if (!_isInitialized) {
-        print('❌ [NotificacionesService] initNotification falló, no se muestra notificación');
+        //print('❌ [NotificacionesService] initNotification falló, no se muestra notificación');
         return;
       }
     }
     await notificationsPlugin.show(id, title, body, notificationDetails());
-    print('✅ [NotificacionesService] notificación enviada: $title / $body');
+    //print('✅ [NotificacionesService] notificación enviada: $title / $body');
   }
 }

@@ -16,7 +16,7 @@ void main() {
 
         while (sigue && concurrentRequests <= 100) {
           // Puedes aumentar el límite
-          print('Probando con $concurrentRequests solicitudes...');
+          //print('Probando con $concurrentRequests solicitudes...');
           final List<Future<http.StreamedResponse>> requests = [];
           for (int i = 0; i < concurrentRequests; i++) {
             final request = http.MultipartRequest('POST', uri)
@@ -32,7 +32,7 @@ void main() {
             sigue = false;
           }
         }
-        print('Máximo de solicitudes concurrentes exitosas: $maxSuccess');
+        //print('Máximo de solicitudes concurrentes exitosas: $maxSuccess');
         expect(maxSuccess, greaterThan(0),
             reason: 'La API no soporta ninguna solicitud concurrente');
       },
