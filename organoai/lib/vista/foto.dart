@@ -275,7 +275,7 @@ class ScanResultsPage extends StatelessWidget {
     return "${ahora.day.toString().padLeft(2, '0')}/${ahora.month.toString().padLeft(2, '0')}/${ahora.year}";
   }
 
-  void _guardarEscaneos(BuildContext context) {
+  /*void _guardarEscaneos(BuildContext context) {
     final fecha = _obtenerFechaActual();
 
     for (var image in images) {
@@ -293,7 +293,7 @@ class ScanResultsPage extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Escaneos guardados en el historial.")),
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {

@@ -2,9 +2,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class NotificacionesService {
-     set isInitialized(bool value) => _isInitialized = value;
-  set notificationsEnabled(bool value) => _notificationsEnabled = value;
-
   // Singleton
   NotificacionesService._privateConstructor()
       : notificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -12,42 +9,42 @@ class NotificacionesService {
   // Constructor para inyección de dependencias (test)
   NotificacionesService.withPlugin(this.notificationsPlugin);
 
-  static final NotificacionesService instance = NotificacionesService._privateConstructor();
+  static final NotificacionesService instance =
+      NotificacionesService._privateConstructor();
 
   final FlutterLocalNotificationsPlugin notificationsPlugin;
 
-
-  bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
-
-  // Flag para habilitar o deshabilitar notificaciones
-  bool _notificationsEnabled = true;
-  bool get notificationsEnabled => _notificationsEnabled;
+  bool isInitialized = false;
+  bool notificationsEnabled = true;
 
   void setNotificationsEnabled(bool enabled) {
-    _notificationsEnabled = enabled;
-    print('🔔 [NotificacionesService] notificationsEnabled set to $_notificationsEnabled');
+    notificationsEnabled = enabled;
+    print(
+        '🔔 [NotificacionesService] notificationsEnabled set to $notificationsEnabled');
   }
 
   Future<void> initNotification() async {
     print('🔔 [NotificacionesService] initNotification() called');
-    if (_isInitialized) {
+    if (isInitialized) {
       print('🔔 [NotificacionesService] ya inicializado, saliendo');
       return;
     }
 
     final status = await Permission.notification.status;
-    print('🔔 [NotificacionesService] estado permiso antes de request(): $status');
+    print(
+        '🔔 [NotificacionesService] estado permiso antes de request(): $status');
     if (status.isDenied || status.isPermanentlyDenied) {
       final newStatus = await Permission.notification.request();
-      print('🔔 [NotificacionesService] estado permiso después de request(): $newStatus');
+      print(
+          '🔔 [NotificacionesService] estado permiso después de request(): $newStatus');
       if (!newStatus.isGranted) {
         print('⚠️ [NotificacionesService] permiso denegado, no se inicializa');
         return;
       }
     }
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(
       android: androidSettings,
       iOS: DarwinInitializationSettings(),
@@ -55,10 +52,11 @@ class NotificacionesService {
 
     await notificationsPlugin.initialize(settings,
         onDidReceiveNotificationResponse: (response) {
-      print('🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
+      print(
+          '🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
     });
 
-    _isInitialized = true;
+    isInitialized = true;
     print('🔔 [NotificacionesService] inicializado con éxito');
   }
 
@@ -81,15 +79,17 @@ class NotificacionesService {
     String? body,
   }) async {
     print('🔔 [NotificacionesService] showNotification() called');
-    if (!_notificationsEnabled) {
+    if (!notificationsEnabled) {
       print('🔕 [NotificacionesService] notificaciones desactivadas');
       return;
     }
-    if (!_isInitialized) {
-      print('⚠️ [NotificacionesService] no está inicializado, llamando a initNotification()');
+    if (!isInitialized) {
+      print(
+          '⚠️ [NotificacionesService] no está inicializado, llamando a initNotification()');
       await initNotification();
-      if (!_isInitialized) {
-        print('❌ [NotificacionesService] initNotification falló, no se muestra notificación');
+      if (!isInitialized) {
+        print(
+            '❌ [NotificacionesService] initNotification falló, no se muestra notificación');
         return;
       }
     }
