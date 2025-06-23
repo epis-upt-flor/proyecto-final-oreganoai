@@ -51,6 +51,8 @@ except Exception as e:
 YOLO_CONF_THRESHOLD = 0.5
 DISEASE_MODEL_IMG_SIZE = (224, 224)
 
+# ... (código anterior sin cambios)
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
@@ -68,12 +70,14 @@ def predict():
         yolo_results = yolo_model(img_pil)
 
         oregano_detected = False
+        confidence = 0.0
         for r in yolo_results:
             for box in r.boxes:
-                confidence = float(box.conf[0])
+                conf = float(box.conf[0])
                 class_id = int(box.cls[0])
-                if confidence >= YOLO_CONF_THRESHOLD and class_id == OREGANO_CLASS_ID:
+                if conf >= YOLO_CONF_THRESHOLD and class_id == OREGANO_CLASS_ID:
                     oregano_detected = True
+                    confidence = conf  # Guardar la confianza de detección
                     break
             if oregano_detected:
                 break
@@ -81,7 +85,7 @@ def predict():
         if not oregano_detected:
             return jsonify({"message": "No oregano detected in the image with the specified confidence.", "detecciones": []}), 200
 
-        # 2. Si se detecta orégano, ejecutar el modelo de enfermedades en la imagen completa
+        # 2. Clasificación de enfermedad
         disease_status = "No clasificado (modelo de enfermedad no cargado)"
         disease_confidence = 0.0
 
@@ -93,27 +97,29 @@ def predict():
 
             # Clasificar la enfermedad
             disease_pred = disease_model.predict(img_array, verbose=0)
+            disease_confidence = float(np.max(disease_pred))
             disease_idx = int(np.argmax(disease_pred))
-            disease_conf = float(np.max(disease_pred))
 
-            if 0 <= disease_idx < len(DISEASE_CLASS_NAMES):
+            # Lógica modificada: Umbral de 0.8
+            if disease_confidence >= 0.8 and 0 <= disease_idx < len(DISEASE_CLASS_NAMES):
                 disease_status = DISEASE_CLASS_NAMES[disease_idx]
             else:
-                disease_status = "Clase de enfermedad desconocida"
+                disease_status = "Oregano sano o enfermedad desconocida"
 
         # Retornar los resultados
         return jsonify({
             "message": "Detección y clasificación exitosas",
             "detecciones": [{
                 "object": "oregano",
-                "detection_confidence_yolo": round(confidence, 4) if oregano_detected else 0.0,
+                "detection_confidence_yolo": round(confidence, 4),
                 "disease_status": disease_status,
-                "disease_confidence": round(disease_conf, 4)
+                "disease_confidence": round(disease_confidence, 4)
             }]
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
