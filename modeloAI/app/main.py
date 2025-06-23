@@ -14,11 +14,11 @@ app = Flask(__name__)
 # --- Rutas a los modelos ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Ruta a tu modelo YOLOv8n (debe ser un archivo .pt)
-YOLO_MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
+# Ruta al modelo YOLO (debe ser .pt)
+YOLO_MODEL_PATH = os.path.join(BASE_DIR, "ModeloDetectorEnfermedadesYOLO.pt")
 
-# Ruta a tu modelo de clasificación de enfermedades (Keras .keras o .h5)
-DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "ModeloDetectorEnfermedadesYOLO.pt")
+# Ruta al modelo de clasificación de enfermedades (Keras .h5)
+DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
 DISEASE_CLASS_NAMES = ['ALTERNARIA', 'MOSAICO', 'OIDIO', 'ROYA']
 
 # --- Cargar los modelos ---
@@ -27,7 +27,8 @@ disease_model = None
 OREGANO_CLASS_ID = -1
 
 try:
-    yolo_model = YOLO(YOLO_MODEL_PATH, verbose=False)
+    # Especificar explícitamente la tarea como 'detect'
+    yolo_model = YOLO(YOLO_MODEL_PATH, task='detect', verbose=False)
     if 'oregano' in yolo_model.names.values():
         for k, v in yolo_model.names.items():
             if v == 'oregano':
@@ -35,7 +36,7 @@ try:
                 break
     print(f"Modelo YOLO cargado correctamente desde: {YOLO_MODEL_PATH}")
     if OREGANO_CLASS_ID == -1:
-        print("Advertencia: La clase 'oregano' no se encontró en las etiquetas del modelo YOLO. Asegúrate de que 'oregano' es la clase detectada.")
+        print("Advertencia: La clase 'oregano' no se encontró en las etiquetas del modelo YOLO.")
 except Exception as e:
     print(f"Error al cargar el modelo YOLO: {e}")
     exit(1)
@@ -50,8 +51,6 @@ except Exception as e:
 # --- Parámetros de Inferencia ---
 YOLO_CONF_THRESHOLD = 0.5
 DISEASE_MODEL_IMG_SIZE = (224, 224)
-
-# ... (código anterior sin cambios)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -77,7 +76,7 @@ def predict():
                 class_id = int(box.cls[0])
                 if conf >= YOLO_CONF_THRESHOLD and class_id == OREGANO_CLASS_ID:
                     oregano_detected = True
-                    confidence = conf  # Guardar la confianza de detección
+                    confidence = conf
                     break
             if oregano_detected:
                 break
@@ -85,7 +84,7 @@ def predict():
         if not oregano_detected:
             return jsonify({"message": "No oregano detected in the image with the specified confidence.", "detecciones": []}), 200
 
-        # 2. Clasificación de enfermedad
+        # 2. Si se detecta orégano, ejecutar el modelo de enfermedades en la imagen completa
         disease_status = "No clasificado (modelo de enfermedad no cargado)"
         disease_confidence = 0.0
 
@@ -100,7 +99,7 @@ def predict():
             disease_confidence = float(np.max(disease_pred))
             disease_idx = int(np.argmax(disease_pred))
 
-            # Lógica modificada: Umbral de 0.8
+            # Umbral de confianza para enfermedades
             if disease_confidence >= 0.8 and 0 <= disease_idx < len(DISEASE_CLASS_NAMES):
                 disease_status = DISEASE_CLASS_NAMES[disease_idx]
             else:
@@ -119,7 +118,6 @@ def predict():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
