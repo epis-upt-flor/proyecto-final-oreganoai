@@ -8,64 +8,55 @@ import io
 from ultralytics import YOLO
 import logging
 
-# Configurar logging para suprimir mensajes de TensorFlow
+# Configurar logging
 
 
-# Crear la aplicación Flask
 app = Flask(__name__)
 
 # --- Configuración de rutas ---
-BASE_DIR = "./app"
+BASE_DIR = "./app"  # Usar ruta absoluta en contenedor
 
 # Rutas de modelos
-YOLO_MODEL_PATH = os.path.join(BASE_DIR, "DetectorEnfermedadesYOLO.pt")
-DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
+OREGANO_DETECTOR_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
+DISEASE_DETECTOR_PATH = os.path.join(BASE_DIR, "DetectorEnfermedadesYOLO.pt")
 DISEASE_CLASS_NAMES = ['ALTERNARIA', 'MOSAICO', 'OIDIO', 'ROYA']
 
 # --- Inicialización de modelos ---
-yolo_model = None
-disease_model = None
-OREGANO_CLASS_ID = -1
+oregano_detector = None  # Modelo CNN para detectar orégano
+disease_detector = None  # Modelo YOLO para detectar enfermedades
 
 def load_models():
-    global yolo_model, disease_model, OREGANO_CLASS_ID
+    global oregano_detector, disease_detector
     
-    print("⏳ Cargando modelos...")
+    logger.info("⏳ Cargando modelos...")
     
-    # Cargar modelo YOLO
+    # 1. Cargar modelo detector de orégano (CNN)
     try:
-        if os.path.exists(YOLO_MODEL_PATH):
-            yolo_model = YOLO(YOLO_MODEL_PATH, task='detect')
-            
-            # Buscar ID de clase 'oregano'
-            if yolo_model.names:
-                for class_id, class_name in yolo_model.names.items():
-                    if class_name == 'oregano':
-                        OREGANO_CLASS_ID = class_id
-                        break
-            
-            print(f"✅ Modelo YOLO cargado | Clase oregano ID: {OREGANO_CLASS_ID}")
+        if os.path.exists(OREGANO_DETECTOR_PATH):
+            oregano_detector = load_model(OREGANO_DETECTOR_PATH)
+            logger.info("✅ Modelo detector de orégano (CNN) cargado")
         else:
-            print(f"❌ Archivo YOLO no encontrado: {YOLO_MODEL_PATH}")
+            logger.error(f"❌ Archivo de detector de orégano no encontrado: {OREGANO_DETECTOR_PATH}")
     except Exception as e:
-        print(f"🚨 Error cargando YOLO: {str(e)}")
+        logger.error(f"🚨 Error cargando detector de orégano: {str(e)}")
     
-    # Cargar modelo de enfermedades
+    # 2. Cargar modelo detector de enfermedades (YOLO)
     try:
-        if os.path.exists(DISEASE_MODEL_PATH):
-            disease_model = load_model(DISEASE_MODEL_PATH)
-            print("✅ Modelo de enfermedades cargado")
+        if os.path.exists(DISEASE_DETECTOR_PATH):
+            disease_detector = YOLO(DISEASE_DETECTOR_PATH, task='detect')
+            logger.info("✅ Modelo detector de enfermedades (YOLO) cargado")
         else:
-            print(f"❌ Archivo de modelo de enfermedades no encontrado: {DISEASE_MODEL_PATH}")
+            logger.error(f"❌ Archivo de detector de enfermedades no encontrado: {DISEASE_DETECTOR_PATH}")
     except Exception as e:
-        print(f"🚨 Error cargando modelo de enfermedades: {str(e)}")
+        logger.error(f"🚨 Error cargando detector de enfermedades: {str(e)}")
 
-# Cargar modelos al iniciar la aplicación
+# Cargar modelos al iniciar
 load_models()
 
 # --- Parámetros ---
-YOLO_CONF_THRESHOLD = 0.5
-DISEASE_MODEL_IMG_SIZE = (224, 224)
+OREGANO_CONF_THRESHOLD = 0.5  # Umbral para considerar que se detecta orégano
+DISEASE_CONF_THRESHOLD = 0.8  # Umbral para considerar enfermedad
+OREGANO_MODEL_IMG_SIZE = (224, 224)  # Tamaño para el modelo de orégano
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -80,73 +71,71 @@ def predict():
         # Leer imagen
         img = Image.open(io.BytesIO(file.read())).convert('RGB')
         
-        # 1. Verificar si el modelo YOLO está cargado
-        if not yolo_model:
-            return jsonify({"error": "Modelo YOLO no cargado"}), 500
+        # 1. Verificar si el modelo detector de orégano está cargado
+        if oregano_detector is None:
+            return jsonify({"error": "Modelo detector de orégano no cargado"}), 500
         
-        # 2. Detección de orégano con YOLO
-        results = yolo_model(img)
-        oregano_detected = False
-        confianza = 0.0
+        # Preprocesar imagen para el modelo de orégano
+        img_oregano = img.resize(OREGANO_MODEL_IMG_SIZE)
+        img_array = np.array(img_oregano) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
         
-        for r in results:
-            for box in r.boxes:
-                conf = float(box.conf[0])
-                class_id = int(box.cls[0])
-                if conf >= YOLO_CONF_THRESHOLD and class_id == OREGANO_CLASS_ID:
-                    oregano_detected = True
-                    confianza = conf
-                    break
-            if oregano_detected:
-                break
+        # Predecir si es orégano
+        pred_oregano = oregano_detector.predict(img_array, verbose=0)
+        conf_oregano = float(pred_oregano[0][0])  # Probabilidad de ser orégano
         
-        if not oregano_detected:
+        # Si no es orégano, retornar inmediatamente
+        if conf_oregano < OREGANO_CONF_THRESHOLD:
             return jsonify({
                 "message": "No se detectó orégano en la imagen",
+                "confianza_oregano": round(conf_oregano, 4),
                 "detections": []
             }), 200
         
-        # 3. Clasificación de enfermedades
-        enfermedad = "Modelo no cargado"
+        # 2. Detección de enfermedades con YOLO
+        enfermedad = "Oregano sano o enfermedad desconocida"
         conf_enfermedad = 0.0
         
-        if disease_model:
-            # Preprocesamiento
-            img_processed = img.resize(DISEASE_MODEL_IMG_SIZE)
-            img_array = np.array(img_processed) / 255.0
-            img_array = np.expand_dims(img_array, axis=0)
+        if disease_detector:
+            # Ejecutar el modelo YOLO en la imagen original
+            results = disease_detector(img)
             
-            # Predicción
-            preds = disease_model.predict(img_array, verbose=0)
-            conf_enfermedad = float(np.max(preds))
-            idx_enfermedad = int(np.argmax(preds))
+            # Buscar la enfermedad con mayor confianza
+            for r in results:
+                for box in r.boxes:
+                    conf = float(box.conf[0])
+                    class_id = int(box.cls[0])
+                    
+                    # Actualizar si encontramos una enfermedad con mayor confianza
+                    if conf > conf_enfermedad:
+                        conf_enfermedad = conf
+                        if class_id < len(DISEASE_CLASS_NAMES):
+                            enfermedad = DISEASE_CLASS_NAMES[class_id]
             
-            # Aplicar umbral
-            if conf_enfermedad >= 0.8 and 0 <= idx_enfermedad < len(DISEASE_CLASS_NAMES):
-                enfermedad = DISEASE_CLASS_NAMES[idx_enfermedad]
-            else:
+            # Aplicar umbral de confianza
+            if conf_enfermedad < DISEASE_CONF_THRESHOLD:
                 enfermedad = "Oregano sano o enfermedad desconocida"
         
         # Respuesta
         return jsonify({
             "message": "Análisis completado",
+            "confianza_oregano": round(conf_oregano, 4),
             "detections": [{
-                "objeto": "oregano",
-                "confianza_deteccion": round(confianza, 4),
-                "estado_enfermedad": enfermedad,
+                "enfermedad": enfermedad,
                 "confianza_enfermedad": round(conf_enfermedad, 4)
             }]
         }), 200
     
     except Exception as e:
+        logger.exception("Error durante la predicción")
         return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({
         "status": "ok",
-        "yolo_loaded": yolo_model is not None,
-        "disease_model_loaded": disease_model is not None
+        "oregano_detector_loaded": oregano_detector is not None,
+        "disease_detector_loaded": disease_detector is not None
     }), 200
 
 if __name__ == '__main__':
