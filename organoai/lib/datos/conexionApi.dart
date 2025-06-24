@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ConexionApi {
   // URL de la API REST
-  final String _url = 'https://e85f-138-99-179-97.ngrok-free.app/predict';
+  final String _url = 'https://32aa-138-99-179-97.ngrok-free.app/predict';
 
   // Función para subir la imagen y obtener la respuesta de la API
   Future<Map<String, dynamic>> predictImage(String imagePath) async {
