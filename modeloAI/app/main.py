@@ -15,10 +15,10 @@ import logging
 app = Flask(__name__)
 
 # --- Configuración de rutas ---
-BASE_DIR = "/app"
+BASE_DIR = "./app"
 
 # Rutas de modelos
-YOLO_MODEL_PATH = os.path.join(BASE_DIR, "ModeloDetectorEnfermedadesYOLO.pt")
+YOLO_MODEL_PATH = os.path.join(BASE_DIR, "DetectorEnfermedadesYOLO.pt")
 DISEASE_MODEL_PATH = os.path.join(BASE_DIR, "modelo_cnn_oreganoV2.h5")
 DISEASE_CLASS_NAMES = ['ALTERNARIA', 'MOSAICO', 'OIDIO', 'ROYA']
 
