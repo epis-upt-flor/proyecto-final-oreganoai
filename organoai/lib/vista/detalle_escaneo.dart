@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
-import 'foto.dart';
-import 'historial.dart';
-import 'perfil.dart';
-import 'configuracion.dart';
+import 'package:organoai/datos/modeloDetalle_Escaneo.dart';
 
 class DetalleEscaneoPage extends StatelessWidget {
-  final String tipoEnfermedad;
-  final String descripcion;
-  final String urlImagen;
-  final String fecha;
-  final String tratamiento;
+  final EscaneoDetalle escaneo;
 
-  const DetalleEscaneoPage({
-    super.key,
-    required this.tipoEnfermedad,
-    required this.descripcion,
-    required this.urlImagen,
-    required this.fecha,
-    required this.tratamiento,
-  });
+  const DetalleEscaneoPage({super.key, required this.escaneo});
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +19,22 @@ class DetalleEscaneoPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Image.network(urlImagen, height: 250),
-            ),
+            Center(child: Image.network(escaneo.urlImagen, height: 250)),
             const SizedBox(height: 20),
-            Text("Fecha: $fecha", style: const TextStyle(fontSize: 16)),
+            Text("Fecha: ${escaneo.fecha}",
+                style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 10),
             Text("Tipo de Enfermedad:",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(tipoEnfermedad, style: const TextStyle(fontSize: 16)),
+            Text(escaneo.tipoEnfermedad, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 10),
             Text("Descripción:",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(descripcion, style: const TextStyle(fontSize: 16)),
+            Text(escaneo.descripcion, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 10),
             Text("Tratamiento:",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(tratamiento, style: const TextStyle(fontSize: 16)),
+            Text(escaneo.tratamiento, style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
