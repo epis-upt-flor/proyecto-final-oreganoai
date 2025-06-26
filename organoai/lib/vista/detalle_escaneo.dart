@@ -9,35 +9,74 @@ class DetalleEscaneoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE8F5E9),
       appBar: AppBar(
-        title: const Text('Detalle del Escaneo'),
-        backgroundColor: Colors.green[700],
+        backgroundColor: Colors.white,
         centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        elevation: 0,
+        title: const Column(
           children: [
-            Center(child: Image.network(escaneo.urlImagen, height: 250)),
-            const SizedBox(height: 20),
-            Text("Fecha: ${escaneo.fecha}",
-                style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            Text("Tipo de Enfermedad:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(escaneo.tipoEnfermedad, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            Text("Descripción:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(escaneo.descripcion, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            Text("Tratamiento:",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(escaneo.tratamiento, style: const TextStyle(fontSize: 16)),
+            Icon(Icons.eco, size: 30, color: Color(0xFF1DB954)),
+            SizedBox(height: 2),
+            Text(
+              'OreganoAI',
+              style: TextStyle(
+                color: Color(0xFF1DB954),
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
           ],
         ),
       ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  escaneo.urlImagen,
+                  height: 230,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSection("Fecha:", escaneo.fecha),
+            const SizedBox(height: 12),
+            _buildSection("Tipo de Enfermedad:", escaneo.tipoEnfermedad),
+            const SizedBox(height: 12),
+            _buildSection("Descripción:", escaneo.descripcion),
+            const SizedBox(height: 12),
+            _buildSection("Tratamiento:", escaneo.tratamiento),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSection(String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          content,
+          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          textAlign: TextAlign.justify,
+        ),
+      ],
     );
   }
 }

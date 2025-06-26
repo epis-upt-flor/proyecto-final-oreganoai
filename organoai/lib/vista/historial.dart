@@ -20,119 +20,132 @@ class HistorialPage extends StatelessWidget {
         builder: (context, viewModel, _) {
           return Scaffold(
             appBar: AppBar(
-              automaticallyImplyLeading: false,
-              title: const Text("Historial de Escaneos"),
-              backgroundColor: Colors.green[700],
+              backgroundColor: Colors.white,
               centerTitle: true,
+              elevation: 0,
+              title: const Column(
+                children: [
+                  Icon(Icons.eco, size: 30, color: Color(0xFF1DB954)),
+                  SizedBox(height: 2),
+                  Text(
+                    'OreganoAI',
+                    style: TextStyle(
+                      color: Color(0xFF1DB954),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            body: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Buscar por fecha (dd/mm/aaaa)',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+            body: Container(
+              color: const Color(0xFFE8F5E9),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Buscar por fecha (dd/mm/aaaa)',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
+                      onChanged: viewModel.actualizarFiltroFecha,
                     ),
-                    onChanged: viewModel.actualizarFiltroFecha,
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: DropdownButtonFormField<String>(
-                    value: viewModel.filtroEnfermedad,
-                    decoration: InputDecoration(
-                      labelText: 'Filtrar por enfermedad',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: DropdownButtonFormField<String>(
+                      value: viewModel.filtroEnfermedad,
+                      decoration: InputDecoration(
+                        labelText: 'Filtrar por enfermedad',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
-                      filled: true,
-                      fillColor: Colors.white,
+                      items: viewModel.enfermedades
+                          .map((enf) => DropdownMenuItem(
+                                value: enf,
+                                child: Text(enf),
+                              ))
+                          .toList(),
+                      onChanged: viewModel.actualizarFiltroEnfermedad,
                     ),
-                    items: viewModel.enfermedades
-                        .map((enf) =>
-                            DropdownMenuItem(value: enf, child: Text(enf)))
-                        .toList(),
-                    onChanged: viewModel.actualizarFiltroEnfermedad,
                   ),
-                ),
-                Expanded(
-                  child: StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
-                    stream: viewModel.escaneosAgrupadosStream(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                            child: Text("No hay escaneos registrados."));
-                      }
-                      final agrupado = snapshot.data!;
-                      return agrupado.isEmpty
-                          ? const Center(
-                              child: Text("No hay escaneos que coincidan."))
-                          : ListView(
-                              padding: const EdgeInsets.all(10),
-                              children: agrupado.entries.map((entry) {
-                                final fecha = entry.key;
-                                final escaneos = entry.value;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      fecha,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                      ),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: StreamBuilder<
+                          Map<String, List<Map<String, dynamic>>>>(
+                        stream: viewModel.escaneosAgrupadosStream(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text("No hay escaneos registrados."),
+                            );
+                          }
+                          final agrupado = snapshot.data!;
+                          return ListView(
+                            children: agrupado.entries.map((entry) {
+                              final fecha = entry.key;
+                              final escaneos = entry.value;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    fecha,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
                                     ),
-                                    const SizedBox(height: 5),
-                                    ...escaneos.map((e) => Card(
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black12,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: escaneos.length,
+                                      itemBuilder: (context, index) {
+                                        final e = escaneos[index];
+                                        return Card(
+                                          elevation: 2,
                                           margin: const EdgeInsets.symmetric(
-                                              vertical: 8),
-                                          elevation: 4,
-                                          child: ListTile(
-                                            contentPadding:
-                                                const EdgeInsets.all(10),
-                                            leading: e['urlImagen'] != null &&
-                                                    (e['urlImagen'] as String)
-                                                        .isNotEmpty
-                                                ? NetworkImageByHttp(
-                                                    url: e['urlImagen'],
-                                                    width: 70,
-                                                    height: 70,
-                                                  )
-                                                : const Icon(
-                                                    Icons.image_not_supported),
-                                            title: Text(
-                                              e['tipoEnfermedad'] ?? '',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text("Fecha: $fecha"),
-                                                Text(
-                                                  "Descripción: ${e['descripcion'] ?? ''}",
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                Text(
-                                                    "Tratamiento: ${e['tratamiento'] ?? 'No disponible'}"),
-                                              ],
-                                            ),
+                                              vertical: 6, horizontal: 8),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: InkWell(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                             onTap: () {
                                               Navigator.push(
                                                 context,
@@ -157,17 +170,84 @@ class HistorialPage extends StatelessWidget {
                                                 ),
                                               );
                                             },
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Row(
+                                                children: [
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    child: e['urlImagen'] !=
+                                                                null &&
+                                                            (e['urlImagen']
+                                                                    as String)
+                                                                .isNotEmpty
+                                                        ? NetworkImageByHttp(
+                                                            url: e['urlImagen'],
+                                                            width: 60,
+                                                            height: 60,
+                                                          )
+                                                        : const Icon(
+                                                            Icons
+                                                                .image_not_supported,
+                                                            size: 60),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          e['tipoEnfermedad'] ??
+                                                              '',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 16,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Text("Fecha: $fecha"),
+                                                        const SizedBox(
+                                                            height: 4),
+                                                        Text(
+                                                          e['descripcion'] !=
+                                                                  null
+                                                              ? "Descripción: ${(e['descripcion'] as String).length > 60 ? (e['descripcion'] as String).substring(0, 60) + '...' : e['descripcion']}"
+                                                              : "Sin descripción",
+                                                          style:
+                                                              const TextStyle(
+                                                                  fontSize: 13),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
-                                        )),
-                                    const SizedBox(height: 20),
-                                  ],
-                                );
-                              }).toList(),
-                            );
-                    },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             bottomNavigationBar: BottomNavigationBar(
               currentIndex: 0,
