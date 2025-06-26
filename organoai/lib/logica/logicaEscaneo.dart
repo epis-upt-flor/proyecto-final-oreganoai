@@ -64,14 +64,17 @@ class LogicaEscaneo {
   static const String _uploadUrl =
       "https://api.imgbb.com/1/upload?key=$_apiKey";
 
-  Future<String> _uploadImageToImgbb(File image) async {
+  Future<String> _uploadImageToImgbb(Map<String, dynamic> apiResponse) async {
     try {
-      final bytes = await image.readAsBytes();
-      final String base64Image = base64Encode(bytes);
+      final String? imagenBase64 = apiResponse['imagen'];
+      if (imagenBase64 == null) {
+        throw Exception("No se encontró la imagen en la respuesta de la API.");
+      }
+      final String base64String = imagenBase64.split(',').last;
 
       final response = await http.post(
         Uri.parse(_uploadUrl),
-        body: {'image': base64Image},
+        body: {'image': base64String},
       );
 
       if (response.statusCode == 200) {
@@ -123,7 +126,7 @@ class LogicaEscaneo {
       final DateTime now = DateTime.now();
       final File image = images.first;
 
-      final String downloadUrl = await _uploadImageToImgbb(image);
+      final String downloadUrl = await _uploadImageToImgbb(apiResponse);
 
       final List<dynamic> enfermedades = apiResponse['enfermedades'] ?? [];
       print('API RESPONSE COMPLETO: $apiResponse');
