@@ -24,7 +24,7 @@ class FirebaseAuthService {
       }
 
       return userCredential.user;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       //print('Error de registro: ${e.message}');
       return null;
     }
@@ -36,7 +36,7 @@ class FirebaseAuthService {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       return userCredential.user;
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       //print('Error de inicio de sesión: ${e.message}');
       return null;
     }
