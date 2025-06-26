@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Crear directorio para la aplicación
+# Crear directorio para la aplicaciï¿½n
 WORKDIR /app
 
 # Copiar archivos necesarios
@@ -20,5 +20,6 @@ COPY app/ ./app
 # Instalar dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Ejecutar la aplicación
+EXPOSE 5000
+# Ejecutar la aplicaciï¿½n
 CMD ["python", "/app/app/main.py"]
