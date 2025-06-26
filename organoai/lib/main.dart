@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:firebase_core/firebase_core.dart';
-import 'package:organoai/vista/login.dart';
+import 'package:provider/provider.dart'; // 👈 Importante
 import 'firebase_options.dart';
+
+import 'package:organoai/vista/login.dart';
+import 'package:organoai/logica/logicaFoto.dart'; // 👈 Tu ViewModel
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +19,21 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: LoginPage());
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+            create: (_) =>
+                LogicaFoto()), // 👈 Aquí está tu ViewModel registrado
+        // Puedes añadir más ViewModels si lo necesitas
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'OrganoAI',
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+        ),
+        home: const LoginPage(), // 👈 Tu pantalla inicial
+      ),
+    );
   }
 }
