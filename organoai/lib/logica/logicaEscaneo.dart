@@ -64,14 +64,17 @@ class LogicaEscaneo {
   static const String _uploadUrl =
       "https://api.imgbb.com/1/upload?key=$_apiKey";
 
-  Future<String> _uploadImageToImgbb(File image) async {
+  Future<String> _uploadImageToImgbb(Map<String, dynamic> apiResponse) async {
     try {
-      final bytes = await image.readAsBytes();
-      final String base64Image = base64Encode(bytes);
+      final String? imagenBase64 = apiResponse['imagen'];
+      if (imagenBase64 == null) {
+        throw Exception("No se encontró la imagen en la respuesta de la API.");
+      }
+      final String base64String = imagenBase64.split(',').last;
 
       final response = await http.post(
         Uri.parse(_uploadUrl),
-        body: {'image': base64Image},
+        body: {'image': base64String},
       );
 
       if (response.statusCode == 200) {
@@ -93,6 +96,7 @@ class LogicaEscaneo {
 
   Uint8List? obtenerImagenDesdeApi(Map<String, dynamic> apiResponse) {
     final String? imagenBase64 = apiResponse['imagen'];
+
     if (imagenBase64 == null) return null;
     final String base64String = imagenBase64.split(',').last;
     return base64Decode(base64String);
@@ -100,8 +104,11 @@ class LogicaEscaneo {
 
   String formatearEnfermedades(Map<String, dynamic> apiResponse) {
     final enfermedades = apiResponse['enfermedades'];
-    if (enfermedades == null || enfermedades.isEmpty)
+    print('API RESPONSE COMPLETO: $apiResponse');
+    print('ENFERMEDADES LISTA: $enfermedades');
+    if (enfermedades == null || enfermedades.isEmpty) {
       return 'No hay enfermedades detectadas.';
+    }
     return 'Enfermedades:\n' +
         enfermedades.map<String>((e) => '  $e').join('\n');
   }
@@ -119,45 +126,80 @@ class LogicaEscaneo {
       final DateTime now = DateTime.now();
       final File image = images.first;
 
-      final String downloadUrl = await _uploadImageToImgbb(image);
+      final String downloadUrl = await _uploadImageToImgbb(apiResponse);
 
       final List<dynamic> enfermedades = apiResponse['enfermedades'] ?? [];
+      print('API RESPONSE COMPLETO: $apiResponse');
+      print('ENFERMEDADES LISTA: $enfermedades');
       String tipo = 'desconocida';
 
+      // Extraer el nombre de la enfermedad
       for (final item in enfermedades) {
-        final RegExp exp = RegExp(r':\s*([\w\s]+)', caseSensitive: false);
-        final match = exp.firstMatch(item.toString());
-        final String posible = match != null
-            ? match.group(1)!.trim().toLowerCase()
-            : 'desconocida';
-        if (posible != 'desconocida') {
-          tipo = posible;
+        print('Procesando item: $item');
+        if (item.toString().contains(':')) {
+          final partes = item.toString().split(':');
+          if (partes.length > 1) {
+            final posible = partes[1].trim();
+            if (posible.isNotEmpty && posible.toLowerCase() != 'desconocida') {
+              tipo = posible;
+              break;
+            }
+          }
+        } else {
+          // Si no hay ":", puede ser un mensaje como "No se detecta oregano"
+          tipo = item.toString().trim();
           break;
         }
       }
-      if (tipo == 'desconocida' && enfermedades.isNotEmpty) {
-        final RegExp exp = RegExp(r':\s*([\w\s]+)', caseSensitive: false);
-        final match = exp.firstMatch(enfermedades.first.toString());
-        tipo = match != null
-            ? match.group(1)!.trim().toLowerCase()
-            : 'desconocida';
-      }
+      print('TIPO EXTRAÍDO: $tipo');
 
       String descripcion = "No disponible";
       String tratamiento = "No disponible";
 
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('enfermedad')
-          .where('nombre', isGreaterThanOrEqualTo: tipo)
-          .where('nombre', isLessThan: '${tipo}z')
-          .limit(1)
-          .get();
+      // Buscar por coincidencia exacta en Firestore solo si no es sano o desconocido
+      if (tipo.toLowerCase() != 'no se detecta oregano' &&
+          tipo.toLowerCase() != 'desconocida') {
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('enfermedad')
+            .where('nombre', isEqualTo: tipo)
+            .limit(1)
+            .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        final data = querySnapshot.docs.first.data();
-        descripcion = data['descripcion'] ?? descripcion;
-        tratamiento = data['tratamiento'] ?? tratamiento;
+        if (querySnapshot.docs.isNotEmpty) {
+          final data = querySnapshot.docs.first.data();
+          descripcion = data['descripcion'] ?? descripcion;
+          tratamiento = data['tratamiento'] ?? tratamiento;
+        }
+      } else if (tipo.toLowerCase() == 'no se detecta oregano') {
+        descripcion = "No se detectó orégano en la imagen.";
+        tratamiento = "No aplica.";
       }
+
+      // Mostrar en pantalla
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Resultado del escaneo'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Enfermedad detectada: $tipo'),
+                const SizedBox(height: 8),
+                Text('Descripción: $descripcion'),
+                const SizedBox(height: 8),
+                Text('Tratamiento: $tratamiento'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        ),
+      );
 
       await _scanService.guardarEscaneo(
         tipoEnfermedad: tipo,
@@ -258,6 +300,8 @@ class LogicaEscaneo {
       List<File> images, Map<String, dynamic> apiResponse) {
     if (apiResponse['imagen'] != null) {
       final imgBytes = obtenerImagenDesdeApi(apiResponse);
+      print('API RESPONSE COMPLETO: $apiResponse');
+
       if (imgBytes != null) {
         return [
           Padding(

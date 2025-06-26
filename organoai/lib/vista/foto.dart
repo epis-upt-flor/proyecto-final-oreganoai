@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:provider/provider.dart';
 import '../logica/logicaFoto.dart';
-import 'historial.dart';
-import 'perfil.dart';
-import 'configuracion.dart';
 
 class PhotoGallery extends StatelessWidget {
   final bool esInvitado;
