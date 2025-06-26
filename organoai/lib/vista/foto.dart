@@ -4,7 +4,6 @@ import 'dart:io';
 import 'perfil.dart';
 import 'configuracion.dart';
 import 'historial.dart';
-import '../datos/escaneos_memoria.dart';
 import '../logica/logicaNotificaciones.dart';
 import '../datos/conexionApi.dart';
 import '../logica/logicaEscaneo.dart';
@@ -303,23 +302,24 @@ class ScanResultsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...images.map((image) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Image.file(image),
-                )),
+            ..._buildImageWidgets(),
             const SizedBox(height: 20),
             const Text(
               "Respuesta de la API:",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 10),
-            Text(apiResponse.toString()),
+            Text(LogicaEscaneo().formatearEnfermedades(apiResponse)),
             const SizedBox(height: 30),
             Center(
               child: ElevatedButton.icon(
                 //onPressed: () => _guardarEscaneos(context),
-                onPressed: () {
+                onPressed: () async {
                   final logicaEscaneo = LogicaEscaneo();
+                  await notiService.showNotification(
+                    title: 'Escaneo terminado',
+                    body: 'Las imágenes han sido analizadas.',
+                  );
                   logicaEscaneo.guardarEscaneo(context, images, apiResponse);
                 },
                 label: const Text("Guardar"),
@@ -335,5 +335,31 @@ class ScanResultsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension on ScanResultsPage {
+  List<Widget> _buildImageWidgets() {
+    if (apiResponse['imagen'] != null) {
+      final imgBytes = LogicaEscaneo().obtenerImagenDesdeApi(apiResponse);
+      if (imgBytes != null) {
+        return [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Image.memory(
+              imgBytes,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ];
+      }
+    }
+    // Si no hay imagen de la API, muestra las imágenes locales
+    return images
+        .map((image) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Image.file(image),
+            ))
+        .toList();
   }
 }
