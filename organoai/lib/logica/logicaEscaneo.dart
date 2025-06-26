@@ -180,50 +180,73 @@ class LogicaEscaneo {
   Widget buildScanResults(
       List<Map<String, dynamic>> resultados, BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE8F5E9),
       appBar: AppBar(
         title: const Text("Resultados del Escaneo"),
         backgroundColor: Colors.green[700],
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: resultados.map((item) {
             final image = item['image'] as File;
             final response = item['response'] as Map<String, dynamic>;
             final Uint8List? apiImage = obtenerImagenDesdeApi(response);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10),
-                apiImage != null
-                    ? Image.memory(apiImage, fit: BoxFit.cover)
-                    : Image.file(image, fit: BoxFit.cover),
-                const SizedBox(height: 10),
-                Text(
-                  formatearEnfermedades(response),
-                  style: const TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 10),
-                Center(
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.save),
-                    label: const Text("Guardar"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[700],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 12),
-                    ),
-                    onPressed: () async {
-                      await guardarEscaneo(context, [image], response);
-                    },
+            return Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
                   ),
-                ),
-                const Divider(),
-              ],
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: apiImage != null
+                        ? Image.memory(apiImage, fit: BoxFit.cover)
+                        : Image.file(image, fit: BoxFit.cover),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    formatearEnfermedades(response),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.save),
+                      label: const Text("Guardar"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[700],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await guardarEscaneo(context, [image], response);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             );
           }).toList(),
         ),
