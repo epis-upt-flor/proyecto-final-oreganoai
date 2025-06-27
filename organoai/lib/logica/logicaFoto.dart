@@ -10,6 +10,7 @@ import '../vista/configuracion.dart';
 
 class LogicaFoto with ChangeNotifier {
   final List<File> _images = [];
+  bool esInvitado = false;
   final ImagePicker _picker = ImagePicker();
 
   List<File> get images => _images;

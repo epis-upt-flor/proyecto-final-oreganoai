@@ -15,11 +15,25 @@ class PerfilPage extends StatelessWidget {
       child: Consumer<PerfilViewModel>(
         builder: (context, viewModel, _) {
           return Scaffold(
+            backgroundColor: const Color(0xFFE8F5E9),
             appBar: AppBar(
-              automaticallyImplyLeading: false,
-              title: const Text('Mi Perfil'),
-              backgroundColor: Colors.green[700],
+              backgroundColor: Colors.white,
               centerTitle: true,
+              elevation: 0,
+              title: const Column(
+                children: [
+                  Icon(Icons.eco, size: 30, color: Color(0xFF1DB954)),
+                  SizedBox(height: 2),
+                  Text(
+                    'OreganoAI',
+                    style: TextStyle(
+                      color: Color(0xFF1DB954),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
             ),
             body: viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -28,7 +42,9 @@ class PerfilPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Nombre:', style: TextStyle(fontSize: 16)),
+                        const Text('Nombre:',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         TextField(
                           controller: viewModel.nombreController,
@@ -37,13 +53,14 @@ class PerfilPage extends StatelessWidget {
                             fillColor: Colors.white,
                             hintText: 'Ingresa tu nombre',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
                         const SizedBox(height: 20),
                         const Text('Nueva Contraseña:',
-                            style: TextStyle(fontSize: 16)),
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         TextField(
                           controller: viewModel.contrasenaController,
@@ -53,7 +70,7 @@ class PerfilPage extends StatelessWidget {
                             fillColor: Colors.white,
                             hintText: 'Ingresa nueva contraseña',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
@@ -62,11 +79,18 @@ class PerfilPage extends StatelessWidget {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[700],
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 12),
+                                  horizontal: 30, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                             onPressed: () => viewModel.guardarCambios(context),
-                            child: const Text('Guardar Cambios'),
+                            child: const Text(
+                              'Guardar Cambios',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ),
                         ),
                       ],

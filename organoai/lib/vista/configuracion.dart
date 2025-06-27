@@ -14,45 +14,85 @@ class SettingsScreen extends StatelessWidget {
       create: (_) => SettingsViewModel(),
       child: Consumer<SettingsViewModel>(
         builder: (context, viewModel, _) => Scaffold(
+          backgroundColor: const Color(0xFFE8F5E9),
           appBar: AppBar(
-            automaticallyImplyLeading: false,
-            title: const Text('Configuración',
-                style: TextStyle(color: Colors.black)),
-            backgroundColor: Colors.green[700],
-            centerTitle: true,
+            backgroundColor: Colors.white,
             elevation: 0,
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            title: const Column(
+              children: [
+                Icon(Icons.eco, size: 30, color: Color(0xFF1DB954)),
+                SizedBox(height: 2),
+                Text(
+                  'OreganoAI',
+                  style: TextStyle(
+                    color: Color(0xFF1DB954),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
           ),
-          body: ListView(
-            children: [
-              SwitchListTile(
-                title: const Text('Notificaciones',
-                    style: TextStyle(color: Colors.black)),
-                value: viewModel.notificationsEnabled,
-                onChanged: viewModel.toggleNotifications,
-                activeColor: Colors.black54,
-              ),
-              ListTile(
-                title: const Text('Contacto',
-                    style: TextStyle(color: Colors.black)),
-                trailing:
-                    const Icon(Icons.arrow_forward_ios, color: Colors.black),
-                onTap: () {},
-              ),
-              ListTile(
-                title: const Text('Eliminar cuenta',
-                    style: TextStyle(color: Colors.black)),
-                trailing:
-                    const Icon(Icons.arrow_forward_ios, color: Colors.black),
-                onTap: () => viewModel.deleteAccount(context),
-              ),
-              ListTile(
-                title: const Text('Cerrar sesión',
-                    style: TextStyle(color: Colors.black)),
-                trailing:
-                    const Icon(Icons.arrow_forward_ios, color: Colors.black),
-                onTap: () => viewModel.logout(context),
-              ),
-            ],
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              children: [
+                Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: SwitchListTile(
+                    title: const Text('Notificaciones',
+                        style: TextStyle(fontWeight: FontWeight.w500)),
+                    value: viewModel.notificationsEnabled,
+                    onChanged: viewModel.toggleNotifications,
+                    activeColor: Colors.green[700],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    leading:
+                        const Icon(Icons.email_outlined, color: Colors.green),
+                    title: const Text('Contacto'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      // Aquí podrías mostrar un diálogo con contacto
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    leading:
+                        const Icon(Icons.delete_outline, color: Colors.red),
+                    title: const Text('Eliminar cuenta'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => viewModel.deleteAccount(context),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Card(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: ListTile(
+                    leading: const Icon(Icons.logout, color: Colors.black),
+                    title: const Text('Cerrar sesión'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => viewModel.logout(context),
+                  ),
+                ),
+              ],
+            ),
           ),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: 3,
