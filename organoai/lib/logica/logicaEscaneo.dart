@@ -104,11 +104,8 @@ class LogicaEscaneo {
 
   String formatearEnfermedades(Map<String, dynamic> apiResponse) {
     final enfermedades = apiResponse['enfermedades'];
-    print('API RESPONSE COMPLETO: $apiResponse');
-    print('ENFERMEDADES LISTA: $enfermedades');
-    if (enfermedades == null || enfermedades.isEmpty) {
-      return 'No hay enfermedades detectadas.';
-    }
+
+    
     return 'Enfermedades:\n' +
         enfermedades.map<String>((e) => '  $e').join('\n');
   }
