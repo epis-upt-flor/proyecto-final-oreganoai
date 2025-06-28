@@ -218,7 +218,7 @@ class HistorialPage extends StatelessWidget {
                                                         Text(
                                                           e['descripcion'] !=
                                                                   null
-                                                              ? "Descripción: ${(e['descripcion'] as String).length > 60 ? (e['descripcion'] as String).substring(0, 60) + '...' : e['descripcion']}"
+                                                              ? "Descripción: ${(e['descripcion'] as String).length > 60 ? '${(e['descripcion'] as String).substring(0, 60)}...' : e['descripcion']}"
                                                               : "Sin descripción",
                                                           style:
                                                               const TextStyle(

@@ -36,6 +36,7 @@ android {
 
     dependencies {
     // tus otras dependencias…
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
          // si ya tienes esto, mantenlo
      implementation "androidx.core:core-ktx:1.10.1"
    // para permitir múltiples dex files si tu app lo necesita
