@@ -14,6 +14,9 @@ class ImagenConUbicacion {
   final Position? ubicacion;
 
   ImagenConUbicacion({required this.imagen, this.ubicacion});
+
+  double? get latitud => ubicacion?.latitude;
+  double? get longitud => ubicacion?.longitude;
 }
 
 class LogicaFoto with ChangeNotifier {
@@ -21,8 +24,6 @@ class LogicaFoto with ChangeNotifier {
   List<ImagenConUbicacion> get imagenesConUbicacion => _imagenesConUbicacion;
   bool esInvitado = false;
   final ImagePicker _picker = ImagePicker();
-
-  
 
   void eliminarImagen(int index) {
     _imagenesConUbicacion.removeAt(index);

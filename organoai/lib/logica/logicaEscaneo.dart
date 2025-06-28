@@ -120,8 +120,13 @@ class LogicaEscaneo {
         enfermedades.map<String>((e) => '  $e').join('\n');
   }
 
-  Future<void> guardarEscaneo(BuildContext context, List<File> images,
-      Map<String, dynamic> apiResponse) async {
+  Future<void> guardarEscaneo(
+    BuildContext context,
+    List<File> images,
+    Map<String, dynamic> apiResponse, {
+    double? latitud, // <-- Nuevo parámetro opcional
+    double? longitud, // <-- Nuevo parámetro opcional
+  }) async {
     if (images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No hay imágenes para guardar.")),
@@ -214,6 +219,8 @@ class LogicaEscaneo {
         tratamiento: tratamiento,
         fechaEscaneo: now,
         urlImagen: downloadUrl,
+        latitud: latitud, // <-- Pasa la latitud
+        longitud: longitud, // <-- Pasa la longitud
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -304,7 +311,13 @@ class LogicaEscaneo {
                               horizontal: 24, vertical: 12),
                         ),
                         onPressed: () async {
-                          await guardarEscaneo(context, [image], response);
+                          await guardarEscaneo(
+                            context,
+                            [image],
+                            response,
+                            latitud: imagenConUbicacion?.latitud,   // <-- Pasa la latitud aquí
+                            longitud: imagenConUbicacion?.longitud, // <-- Pasa la longitud aquí
+                          );
                         },
                       ),
                     ),
