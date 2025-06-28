@@ -147,6 +147,12 @@ class HistorialPage extends StatelessWidget {
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             onTap: () {
+                                              print(
+                                                  'Datos del escaneo seleccionados: $e');
+                                              print(
+                                                  'Latitud recibida: ${e['latitud']}');
+                                              print(
+                                                  'Longitud recibida: ${e['longitud']}');
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
@@ -165,6 +171,12 @@ class HistorialPage extends StatelessWidget {
                                                       urlImagen:
                                                           e['urlImagen'] ?? '',
                                                       fecha: fecha,
+                                                      latitud: (e['latitud']
+                                                              as num?)
+                                                          ?.toDouble(), // <-- Agregado
+                                                      longitud: (e['longitud']
+                                                              as num?)
+                                                          ?.toDouble(),
                                                     ),
                                                   ),
                                                 ),
