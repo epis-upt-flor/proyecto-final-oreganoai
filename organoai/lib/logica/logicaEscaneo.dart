@@ -5,17 +5,21 @@ import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:organoai/logica/logicaFoto.dart';
 
 class ScanService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // ...existing code...
   Future<void> guardarEscaneo({
     required String tipoEnfermedad,
     required String descripcion,
     required String tratamiento,
     required DateTime fechaEscaneo,
     required String urlImagen,
+    double? latitud, // <-- Agrega estos parámetros opcionales
+    double? longitud,
   }) async {
     try {
       final user = _auth.currentUser;
@@ -32,12 +36,15 @@ class ScanService {
         'tratamiento': tratamiento,
         'fechaEscaneo': Timestamp.fromDate(fechaEscaneo),
         'urlImagen': urlImagen,
+        'latitud': latitud, // <-- Guarda latitud
+        'longitud': longitud, // <-- Guarda longitud
         'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
       throw Exception('Error al guardar el escaneo: ${e.toString()}');
     }
   }
+// ...existing code...
 
   Future<List<Map<String, dynamic>>> obtenerEscaneos() async {
     final user = _auth.currentUser;
@@ -113,8 +120,13 @@ class LogicaEscaneo {
         enfermedades.map<String>((e) => '  $e').join('\n');
   }
 
-  Future<void> guardarEscaneo(BuildContext context, List<File> images,
-      Map<String, dynamic> apiResponse) async {
+  Future<void> guardarEscaneo(
+    BuildContext context,
+    List<File> images,
+    Map<String, dynamic> apiResponse, {
+    double? latitud, // <-- Nuevo parámetro opcional
+    double? longitud, // <-- Nuevo parámetro opcional
+  }) async {
     if (images.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No hay imágenes para guardar.")),
@@ -207,6 +219,8 @@ class LogicaEscaneo {
         tratamiento: tratamiento,
         fechaEscaneo: now,
         urlImagen: downloadUrl,
+        latitud: latitud, // <-- Pasa la latitud
+        longitud: longitud, // <-- Pasa la longitud
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -221,77 +235,97 @@ class LogicaEscaneo {
 
   Widget buildScanResults(
       List<Map<String, dynamic>> resultados, BuildContext context) {
+    if (resultados.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Resultados del Escaneo"),
+          backgroundColor: Colors.green[700],
+          centerTitle: true,
+        ),
+        body: const Center(child: Text("No hay resultados disponibles")),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F5E9),
       appBar: AppBar(
         title: const Text("Resultados del Escaneo"),
         backgroundColor: Colors.green[700],
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: resultados.map((item) {
-            final image = item['image'] as File;
-            final response = item['response'] as Map<String, dynamic>;
-            final Uint8List? apiImage = obtenerImagenDesdeApi(response);
+      body: ListView.builder(
+        padding: const EdgeInsets.all(10),
+        itemCount: resultados.length,
+        itemBuilder: (context, index) {
+          final item = resultados[index];
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
+          if (!item.containsKey('image') || !item.containsKey('response')) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text("Datos inválidos en el resultado"),
+            );
+          }
+
+          final imagenConUbicacion = item['image'] as ImagenConUbicacion?;
+          final image = imagenConUbicacion?.imagen;
+          final response = item['response'] as Map<String, dynamic>?;
+
+          if (image == null || response == null) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text("Error: Imagen o respuesta no válida"),
+            );
+          }
+
+          // Usa _buildImageWidgets para mostrar la imagen correcta
+          final imagenesWidget = _buildImageWidgets([image], response);
+
+          final mensaje = formatearEnfermedades(response);
+          final esSinOregano = mensaje
+                  .toLowerCase()
+                  .contains('no se detecta oregano') ||
+              mensaje.toLowerCase().contains('no hay enfermedades detectadas');
+
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: apiImage != null
-                        ? Image.memory(apiImage, fit: BoxFit.cover)
-                        : Image.file(image, fit: BoxFit.cover),
-                  ),
-                  const SizedBox(height: 12),
+                  ...imagenesWidget,
+                  const SizedBox(height: 10),
                   Text(
-                    formatearEnfermedades(response),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
+                    mensaje,
+                    style: const TextStyle(fontSize: 16),
                   ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.save),
-                      label: const Text("Guardar"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[700],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 10),
+                  if (!esSinOregano)
+                    Center(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.save),
+                        label: const Text("Guardar"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                         ),
+                        onPressed: () async {
+                          await guardarEscaneo(
+                            context,
+                            [image],
+                            response,
+                            latitud: imagenConUbicacion?.latitud,   // <-- Pasa la latitud aquí
+                            longitud: imagenConUbicacion?.longitud, // <-- Pasa la longitud aquí
+                          );
+                        },
                       ),
-                      onPressed: () async {
-                        await guardarEscaneo(context, [image], response);
-                      },
                     ),
-                  ),
                 ],
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -301,6 +335,7 @@ class LogicaEscaneo {
     if (apiResponse['imagen'] != null) {
       final imgBytes = obtenerImagenDesdeApi(apiResponse);
       print('API RESPONSE COMPLETO: $apiResponse');
+      print('Bytes de imagen: $imgBytes');
 
       if (imgBytes != null) {
         return [
@@ -309,6 +344,8 @@ class LogicaEscaneo {
             child: Image.memory(
               imgBytes,
               fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Text('Error al mostrar la imagen'),
             ),
           ),
         ];
@@ -316,9 +353,14 @@ class LogicaEscaneo {
     }
 
     return images
+        .where((image) => image.existsSync())
         .map((image) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Image.file(image),
+              child: Image.file(
+                image,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Text('Error al mostrar la imagen'),
+              ),
             ))
         .toList();
   }

@@ -147,6 +147,12 @@ class HistorialPage extends StatelessWidget {
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                             onTap: () {
+                                              print(
+                                                  'Datos del escaneo seleccionados: $e');
+                                              print(
+                                                  'Latitud recibida: ${e['latitud']}');
+                                              print(
+                                                  'Longitud recibida: ${e['longitud']}');
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
@@ -165,6 +171,12 @@ class HistorialPage extends StatelessWidget {
                                                       urlImagen:
                                                           e['urlImagen'] ?? '',
                                                       fecha: fecha,
+                                                      latitud: (e['latitud']
+                                                              as num?)
+                                                          ?.toDouble(), // <-- Agregado
+                                                      longitud: (e['longitud']
+                                                              as num?)
+                                                          ?.toDouble(),
                                                     ),
                                                   ),
                                                 ),
@@ -218,7 +230,7 @@ class HistorialPage extends StatelessWidget {
                                                         Text(
                                                           e['descripcion'] !=
                                                                   null
-                                                              ? "Descripción: ${(e['descripcion'] as String).length > 60 ? (e['descripcion'] as String).substring(0, 60) + '...' : e['descripcion']}"
+                                                              ? "Descripción: ${(e['descripcion'] as String).length > 60 ? '${(e['descripcion'] as String).substring(0, 60)}...' : e['descripcion']}"
                                                               : "Sin descripción",
                                                           style:
                                                               const TextStyle(

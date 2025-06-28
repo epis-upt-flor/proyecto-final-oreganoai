@@ -60,7 +60,7 @@ class PhotoGallery extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: viewModel.images.isEmpty
+                  child: viewModel.imagenesConUbicacion.isEmpty
                       ? const Center(
                           child: Text(
                             "No hay imágenes aún",
@@ -75,14 +75,14 @@ class PhotoGallery extends StatelessWidget {
                             crossAxisSpacing: 10,
                             mainAxisSpacing: 10,
                           ),
-                          itemCount: viewModel.images.length,
+                          itemCount: viewModel.imagenesConUbicacion.length,
                           itemBuilder: (context, index) {
                             return Stack(
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.file(
-                                    viewModel.images[index],
+                                    viewModel.imagenesConUbicacion[index].imagen,
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
