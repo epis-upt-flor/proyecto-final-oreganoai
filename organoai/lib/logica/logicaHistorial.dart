@@ -71,6 +71,8 @@ class HistorialViewModel extends ChangeNotifier {
           'tratamiento': data['tratamiento'] ?? '',
           'urlImagen': data['urlImagen'] ?? '',
           'tipoEnfermedad': data['tipoEnfermedad'] ?? '',
+          'latitud': data['latitud'],      // <-- asegúrate de incluir esto
+  'longitud': data['longitud'],
         };
 
         agrupado.putIfAbsent(fechaStr, () => []).add(dataConCampos);
