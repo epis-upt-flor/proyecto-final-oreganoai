@@ -1,5 +1,27 @@
 🌿 Aplicativo Móvil para Identificar Enfermedades de la Hoja de Orégano
  
+👥 Integrantes
+
+Raúl Marcelo Cuadros Napa (2017057851)
+Gabriel Fari Melendez Huarachi (2021070311)
+
+
+📚 Curso
+
+Curso: Construcción de Software I
+Docente: Ing. Alberto Johnatan Flor Rodriguez
+Institución: Universidad Privada de Tacna, Facultad de Ingeniería, Escuela Profesional de Ingeniería de Sistemas
+
+
+🎯 Objetivos del Proyecto
+Objetivo General
+Desarrollar una aplicación móvil que identifique enfermedades en las hojas de orégano mediante técnicas de Deep Learning.
+Objetivos Específicos
+
+Capturar imágenes de hojas de orégano para su análisis.
+Entrenar un modelo de Deep Learning para la detección de enfermedades.
+Integrar el modelo en una aplicación móvil funcional.
+Ofrecer recomendaciones prácticas basadas en los diagnósticos generados.
 
 📋 Descripción
 Este proyecto desarrolla una aplicación móvil que utiliza Deep Learning para identificar enfermedades en las hojas de orégano, ayudando a los agricultores de la región de Tacna, Perú a mejorar la productividad de sus cultivos. La aplicación permite detectar problemas de manera temprana y precisa, proporcionando diagnósticos en tiempo real y recomendaciones prácticas para el manejo de enfermedades.
@@ -31,30 +53,6 @@ Python, Pytorch (Deep Learning)
 API
 Flask (integración del modelo con la app)
 
-
-
-👥 Integrantes
-
-Raúl Marcelo Cuadros Napa (2017057851)
-Gabriel Fari Melendez Huarachi (2021070311)
-
-
-📚 Curso
-
-Curso: Construcción de Software I
-Docente: Ing. Alberto Johnatan Flor Rodriguez
-Institución: Universidad Privada de Tacna, Facultad de Ingeniería, Escuela Profesional de Ingeniería de Sistemas
-
-
-🎯 Objetivos del Proyecto
-Objetivo General
-Desarrollar una aplicación móvil que identifique enfermedades en las hojas de orégano mediante técnicas de Deep Learning.
-Objetivos Específicos
-
-Capturar imágenes de hojas de orégano para su análisis.
-Entrenar un modelo de Deep Learning para la detección de enfermedades.
-Integrar el modelo en una aplicación móvil funcional.
-Ofrecer recomendaciones prácticas basadas en los diagnósticos generados.
 
 
 📖 Documentación Adicional
