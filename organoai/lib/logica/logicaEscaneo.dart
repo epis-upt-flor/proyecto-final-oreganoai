@@ -114,7 +114,7 @@ class LogicaEscaneo {
     print('API RESPONSE COMPLETO: $apiResponse');
     print('ENFERMEDADES LISTA: $enfermedades');
     if (enfermedades == null || enfermedades.isEmpty) {
-      return 'No hay enfermedades detectadas.';
+      return 'Sin conexion al servidor API (revise su conexion a internet).';
     }
     return 'Enfermedades:\n' +
         enfermedades.map<String>((e) => '  $e').join('\n');
@@ -315,8 +315,10 @@ class LogicaEscaneo {
                             context,
                             [image],
                             response,
-                            latitud: imagenConUbicacion?.latitud,   // <-- Pasa la latitud aquí
-                            longitud: imagenConUbicacion?.longitud, // <-- Pasa la longitud aquí
+                            latitud: imagenConUbicacion
+                                ?.latitud, // <-- Pasa la latitud aquí
+                            longitud: imagenConUbicacion
+                                ?.longitud, // <-- Pasa la longitud aquí
                           );
                         },
                       ),
