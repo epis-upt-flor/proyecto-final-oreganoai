@@ -60,9 +60,16 @@ class LogicaFoto with ChangeNotifier {
       imagenesConUbicacion.add(ImagenConUbicacion(imagen: compressedImage));
     }
     notifyListeners();
-    }
+  }
 
   // ...existing code...
+
+  //DEBERIA MEDIR EL INTERNET ANTES DE SCAN IMAGES
+  // PONER UNA FLAG DE INTERNETGOOD=0;
+
+
+  // IF INTERGOOD=0 THEN SCAN IMAGES USANDO API, ELSE USAR MODELO LOCAL
+
   Future<void> scanImages(BuildContext context) async {
     if (_imagenesConUbicacion.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +90,7 @@ class LogicaFoto with ChangeNotifier {
     for (final image in _imagenesConUbicacion) {
       try {
         final compressedImage = await _compressImage(image.imagen);
-
+        // AGREGAR UN IF PARA USAR LA CONEXION CNNLOCAL EN LUGAR DE LA API CUANDO HAY MAL INTERNET
         final response = await ConexionApi().predictImage(compressedImage.path);
         // Incluye la ubicación en los resultados
         resultados.add({

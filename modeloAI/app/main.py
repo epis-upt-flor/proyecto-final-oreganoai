@@ -51,7 +51,7 @@ def load_models():
 load_models()
 
 # --- Parámetros ---
-OREGANO_CONF_THRESHOLD = 0.0  #0.6
+OREGANO_CONF_THRESHOLD = 0.6  #0.6
 DISEASE_CONF_THRESHOLD = 0.4
 MODEL_CLASSIFY_SIZE = (224, 224)
 MARGIN = 20  # Margen en píxeles para la imagen
