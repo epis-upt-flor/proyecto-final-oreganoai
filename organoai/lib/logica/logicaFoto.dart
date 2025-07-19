@@ -8,6 +8,8 @@ import '../vista/perfil.dart';
 import '../vista/historial.dart';
 import '../vista/configuracion.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 class ImagenConUbicacion {
   final File imagen;
@@ -51,15 +53,23 @@ class LogicaFoto with ChangeNotifier {
   }
 
   Future<void> pickImages() async {
-    final List<XFile> pickedFiles = await _picker.pickMultiImage();
-    if (pickedFiles.isNotEmpty) {
-      _imagenesConUbicacion.addAll(pickedFiles.map((file) =>
-          ImagenConUbicacion(imagen: File(file.path), ubicacion: null)));
-      notifyListeners();
+    // Código para seleccionar imágenes desde la galería
+    final pickedFiles = await ImagePicker().pickMultiImage();
+    for (var file in pickedFiles) {
+      final compressedImage = await _compressImage(File(file.path));
+      imagenesConUbicacion.add(ImagenConUbicacion(imagen: compressedImage));
     }
+    notifyListeners();
   }
 
   // ...existing code...
+
+  //DEBERIA MEDIR EL INTERNET ANTES DE SCAN IMAGES
+  // PONER UNA FLAG DE INTERNETGOOD=0;
+
+
+  // IF INTERGOOD=0 THEN SCAN IMAGES USANDO API, ELSE USAR MODELO LOCAL
+
   Future<void> scanImages(BuildContext context) async {
     if (_imagenesConUbicacion.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +89,9 @@ class LogicaFoto with ChangeNotifier {
 
     for (final image in _imagenesConUbicacion) {
       try {
-        final response = await ConexionApi().predictImage(image.imagen.path);
+        final compressedImage = await _compressImage(image.imagen);
+        // AGREGAR UN IF PARA USAR LA CONEXION CNNLOCAL EN LUGAR DE LA API CUANDO HAY MAL INTERNET
+        final response = await ConexionApi().predictImage(compressedImage.path);
         // Incluye la ubicación en los resultados
         resultados.add({
           'image': image,
@@ -120,6 +132,29 @@ class LogicaFoto with ChangeNotifier {
         builder: (_) => logicaEscaneo.buildScanResults(resultados, context),
       ),
     );
+  }
+
+  Future<File> _compressImage(File imageFile) async {
+    final imageBytes = await imageFile.readAsBytes();
+    final originalImage = img.decodeImage(imageBytes);
+
+    if (originalImage != null) {
+      // Comprimir la imagen
+      final resizedImage = img.copyResize(originalImage,
+          width: 512, height: 512); // Ajusta el tamaño según tus necesidades
+      final compressedBytes = img.encodeJpg(resizedImage,
+          quality: 85); // Ajusta la calidad según tus necesidades
+
+      // Guardar la imagen comprimida en un archivo temporal
+      final tempDir = await getTemporaryDirectory();
+      final compressedFile =
+          File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await compressedFile.writeAsBytes(compressedBytes);
+
+      return compressedFile;
+    } else {
+      throw Exception("Error al procesar la imagen");
+    }
   }
 
   Future<void> onItemTapped(BuildContext context, int index) async {
