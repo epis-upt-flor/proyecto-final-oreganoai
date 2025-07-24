@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../logica/logicaFoto.dart';
+import '../logica/analizadorInternet.dart';
 
 class PhotoGallery extends StatelessWidget {
   final bool esInvitado;
@@ -127,20 +128,31 @@ class PhotoGallery extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => viewModel.scanImages(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          bool conectado = await AnalizadorInternet.testConexion();
+                          if (conectado) {
+                            viewModel.scanImages(context);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Sin conexión a internet"),
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        child: const Text("Escanear"),
                       ),
-                      child: const Text("Escanear"),
-                    ),
-                  ),
+                    ),                 
                 ],
               ),
             ),

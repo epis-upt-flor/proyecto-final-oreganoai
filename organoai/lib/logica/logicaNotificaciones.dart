@@ -43,18 +43,24 @@ class NotificacionesService {
       }
     }
 
-    const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     const settings = InitializationSettings(
       android: androidSettings,
-      iOS: DarwinInitializationSettings(),
+      iOS: darwinSettings,
+      macOS: darwinSettings,
     );
 
-    await notificationsPlugin.initialize(settings,
-        onDidReceiveNotificationResponse: (response) {
-      print(
-          '🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
-    });
+    await notificationsPlugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        print('🔔 [NotificacionesService] onDidReceiveNotificationResponse: ${response.payload}');
+      },
+    );
 
     isInitialized = true;
     print('🔔 [NotificacionesService] inicializado con éxito');
@@ -70,6 +76,7 @@ class NotificacionesService {
         priority: Priority.high,
       ),
       iOS: DarwinNotificationDetails(),
+      macOS: DarwinNotificationDetails(),
     );
   }
 

@@ -1,0 +1,2 @@
+C:/Users/GaboDesktop/Documents/GitHub/proyecto-final-oreganoai/organoai/android/app/.cxx/RelWithDebInfo/41c1vw1s/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/GaboDesktop/Documents/GitHub/proyecto-final-oreganoai/organoai/android/app/.cxx/RelWithDebInfo/41c1vw1s/x86_64/CMakeFiles/rebuild_cache.dir
